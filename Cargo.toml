@@ -1,0 +1,22 @@
+[package]
+name = "rustjerkbot"
+version = "0.1.0"
+authors = ["Ross Nomann <rossnomann@protonmail.com>"]
+edition = "2018"
+
+[dependencies]
+ammonia = "2.1.1"
+carapax = "0.2.0"
+dotenv = "0.13.0"
+env_logger = "0.6.1"
+failure = "0.1.5"
+futures = "0.1.26"
+liquid = "0.18.2"
+log = "0.4.6"
+rand = "0.6.5"
+redis = "0.10.0"
+regex = "1.1.6"
+serde = "1.0.91"
+serde_json = "1.0.39"
+tokio = "0.1.19"
+tokio-timer = "0.2.10"
