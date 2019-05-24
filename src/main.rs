@@ -10,6 +10,7 @@ use futures::{future, Future};
 mod config;
 mod shippering;
 mod store;
+mod text;
 mod tracker;
 mod utils;
 
@@ -17,6 +18,7 @@ use self::{
     config::Config,
     shippering::{handle_shippering, TemplateStore},
     store::Store,
+    text::TransformCommand,
 };
 
 fn main() {
@@ -44,7 +46,20 @@ fn main() {
                     .add_handler(FnHandler::from(setup_context))
                     .add_handler(FnHandler::from(tracker::handle_update))
                     .add_handler(
-                        CommandsHandler::default().add_handler("/shippering", handle_shippering),
+                        CommandsHandler::default()
+                            .add_handler("/shippering", handle_shippering)
+                            .add_handler("/arrow", TransformCommand::new(text::transform::to_arrow))
+                            .add_handler(
+                                "/huify",
+                                TransformCommand::new(text::transform::to_huified)
+                                    .without_monospace_reply(),
+                            )
+                            .add_handler(
+                                "/square",
+                                TransformCommand::new(text::transform::to_square),
+                            )
+                            .add_handler("/star", TransformCommand::new(text::transform::to_star))
+                            .add_handler("/cw", TransformCommand::new(text::transform::to_cw)),
                     )
                     .run(api.clone(), UpdateMethod::poll(UpdatesStream::new(api)))
             })
