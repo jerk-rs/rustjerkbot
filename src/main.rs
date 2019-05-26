@@ -3,6 +3,7 @@ use carapax::{
     core::{types::Update, Api, UpdateMethod, UpdatesStream},
     App, CommandsHandler, FnHandler,
 };
+use carapax_access::{AccessHandler, AccessRule, InMemoryAccessPolicy};
 use dotenv::dotenv;
 use env_logger;
 use futures::{future, Future};
@@ -38,6 +39,9 @@ fn main() {
     let tpl_store =
         TemplateStore::from_file("data/shippering.yml").expect("Failed to create template store");
 
+    let access_rule = AccessRule::allow_chat(config.chat_id);
+    let access_policy = InMemoryAccessPolicy::default().push_rule(access_rule);
+
     tokio::run(future::lazy(move || {
         Store::open(config.redis_url.clone())
             .map_err(|e| log::error!("Unable to open store: {:?}", e))
@@ -47,6 +51,7 @@ fn main() {
                     context.set(config.clone());
                 };
                 App::new()
+                    .add_handler(AccessHandler::new(access_policy))
                     .add_handler(FnHandler::from(setup_context))
                     .add_handler(FnHandler::from(tracker::handle_update))
                     .add_handler(AutoresponseHandler::new(msg_store))

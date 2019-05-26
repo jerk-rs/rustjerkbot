@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 ammonia = "2.1.1"
 carapax = "0.2.0"
+carapax-access = "0.1.0"
 dotenv = "0.13.0"
 env_logger = "0.6.1"
 failure = "0.1.5"
