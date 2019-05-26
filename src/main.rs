@@ -7,6 +7,7 @@ use dotenv::dotenv;
 use env_logger;
 use futures::{future, Future};
 
+mod autoresponse;
 mod config;
 mod shippering;
 mod store;
@@ -15,6 +16,7 @@ mod tracker;
 mod utils;
 
 use self::{
+    autoresponse::{AutoresponseHandler, MessageStore},
     config::Config,
     shippering::{handle_shippering, TemplateStore},
     store::Store,
@@ -27,6 +29,9 @@ fn main() {
 
     let config = Config::from_env().expect("Can not read configuration file");
     let api = Api::new(config.get_api_config()).expect("Can not to create Api");
+
+    let msg_store =
+        MessageStore::from_file("data/messages.yml").expect("Failed to create message store");
 
     let mut tpl_store = TemplateStore::new().expect("Failed to create template store");
     tpl_store
@@ -45,6 +50,7 @@ fn main() {
                 App::new()
                     .add_handler(FnHandler::from(setup_context))
                     .add_handler(FnHandler::from(tracker::handle_update))
+                    .add_handler(AutoresponseHandler::new(msg_store))
                     .add_handler(
                         CommandsHandler::default()
                             .add_handler("/shippering", handle_shippering)
