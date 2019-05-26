@@ -60,6 +60,10 @@ fn main() {
                                     .without_monospace_reply(),
                             )
                             .add_handler(
+                                "/reverse",
+                                TransformCommand::new(text::transform::to_reversed),
+                            )
+                            .add_handler(
                                 "/square",
                                 TransformCommand::new(text::transform::to_square),
                             )
