@@ -1,6 +1,6 @@
 mod future;
 mod handler;
 mod state;
-mod templates;
+mod template;
 
-pub use self::{handler::handle_shippering, templates::TemplateStore};
+pub use self::{handler::ShipperingHandler, template::TemplateStore};

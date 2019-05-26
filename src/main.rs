@@ -18,7 +18,7 @@ mod utils;
 use self::{
     autoresponse::{AutoresponseHandler, MessageStore},
     config::Config,
-    shippering::{handle_shippering, TemplateStore},
+    shippering::{ShipperingHandler, TemplateStore},
     store::Store,
     text::TransformCommand,
 };
@@ -33,10 +33,8 @@ fn main() {
     let msg_store =
         MessageStore::from_file("data/messages.yml").expect("Failed to create message store");
 
-    let mut tpl_store = TemplateStore::new().expect("Failed to create template store");
-    tpl_store
-        .load_file("data/shippering")
-        .expect("Unable to load shippering templates");
+    let tpl_store =
+        TemplateStore::from_file("data/shippering.yml").expect("Failed to create template store");
 
     tokio::run(future::lazy(move || {
         Store::open(config.redis_url.clone())
@@ -45,7 +43,6 @@ fn main() {
                 let setup_context = move |context: &mut Context, _update: Update| {
                     context.set(store.clone());
                     context.set(config.clone());
-                    context.set(tpl_store.clone());
                 };
                 App::new()
                     .add_handler(FnHandler::from(setup_context))
@@ -53,7 +50,7 @@ fn main() {
                     .add_handler(AutoresponseHandler::new(msg_store))
                     .add_handler(
                         CommandsHandler::default()
-                            .add_handler("/shippering", handle_shippering)
+                            .add_handler("/shippering", ShipperingHandler::new(tpl_store))
                             .add_handler("/arrow", TransformCommand::new(text::transform::to_arrow))
                             .add_handler(
                                 "/huify",
