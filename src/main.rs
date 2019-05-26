@@ -13,6 +13,7 @@ mod shippering;
 mod store;
 mod text;
 mod tracker;
+mod user;
 mod utils;
 
 use self::{
@@ -21,6 +22,7 @@ use self::{
     shippering::{ShipperingHandler, TemplateStore},
     store::Store,
     text::TransformCommand,
+    user::handle_user,
 };
 
 fn main() {
@@ -62,7 +64,8 @@ fn main() {
                                 TransformCommand::new(text::transform::to_square),
                             )
                             .add_handler("/star", TransformCommand::new(text::transform::to_star))
-                            .add_handler("/cw", TransformCommand::new(text::transform::to_cw)),
+                            .add_handler("/cw", TransformCommand::new(text::transform::to_cw))
+                            .add_handler("/user", handle_user),
                     )
                     .run(api.clone(), UpdateMethod::poll(UpdatesStream::new(api)))
             })
