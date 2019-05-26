@@ -1,5 +1,7 @@
 # RUSTJERKBOT
 
+[![Travis](https://img.shields.io/travis/jerk-rs/rustjerkbot.svg?style=flat-square)](https://travis-ci.org/jerk-rs/rustjerkbot)
+
 ## Environment variables
 
 - `RUSTJERKBOT_TOKEN` - Telegram bot token
