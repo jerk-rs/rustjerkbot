@@ -21,7 +21,8 @@ use futures::{
     future::{self, Either},
     Future, Stream,
 };
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
+use tokio_timer::throttle::Throttle;
 
 pub struct ShipperingHandler {
     store: Arc<TemplateStore>,
@@ -96,7 +97,7 @@ impl CommandHandler for ShipperingHandler {
                                     .and_then(move |result| {
                                         if let Some(result) = result {
                                             Either::A(
-                                                tokio_timer::throttle::Throttle::new(
+                                                Throttle::new(
                                                     futures_ordered(result.lines().map(|line| {
                                                         api.execute(
                                                             SendMessage::new(chat_id, line)
@@ -104,7 +105,7 @@ impl CommandHandler for ShipperingHandler {
                                                         )
                                                         .map_err(|e| e.compat())
                                                     })),
-                                                    std::time::Duration::from_secs(message_timeout),
+                                                    Duration::from_secs(message_timeout),
                                                 )
                                                 .collect()
                                                 .from_err()

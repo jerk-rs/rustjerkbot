@@ -21,7 +21,7 @@ where
         queue.items.push_back(future.into_future());
     }
 
-    return queue;
+    queue
 }
 
 #[must_use = "streams do nothing unless polled"]

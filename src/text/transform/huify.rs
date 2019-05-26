@@ -17,16 +17,15 @@ pub fn transform(orig: &str) -> TransformResult<String> {
     Ok(result)
 }
 
-#[allow(clippy::trivially_copy_pass_by_ref)]
-fn is_consonant(c: &char) -> bool {
-    c >= &'а' && c <= &'я' && !VOWELS.contains(c)
+fn is_consonant(c: char) -> bool {
+    c >= 'а' && c <= 'я' && !VOWELS.contains(&c)
 }
 
 fn should_huify(s: &str) -> bool {
     let mut chars = s.chars().peekable();
     match chars.next() {
         Some('х') => match chars.next() {
-            Some('у') => chars.peek().map(is_consonant).unwrap_or(true),
+            Some('у') => chars.peek().map(|x| is_consonant(*x)).unwrap_or(true),
             Some(_) => true,
             None => false,
         },
