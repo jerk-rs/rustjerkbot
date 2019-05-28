@@ -42,10 +42,21 @@ fn main() {
     let access_rule = AccessRule::allow_chat(config.chat_id);
     let access_policy = InMemoryAccessPolicy::default().push_rule(access_rule);
 
+    let update_method = match config.webhook_url.clone() {
+        Some((addr, path)) => {
+            log::info!("Started receiving updates via webhook: {}{}", addr, path);
+            UpdateMethod::webhook(addr, path)
+        }
+        None => {
+            log::info!("Started receiving updates via long polling");
+            UpdateMethod::poll(UpdatesStream::new(api.clone()))
+        }
+    };
+
     tokio::run(future::lazy(move || {
         Store::open(config.redis_url.clone())
             .map_err(|e| log::error!("Unable to open store: {:?}", e))
-            .and_then(|store| {
+            .and_then(move |store| {
                 let setup_context = move |context: &mut Context, _update: Update| {
                     context.set(store.clone());
                     context.set(config.clone());
@@ -76,7 +87,7 @@ fn main() {
                             .add_handler("/cw", TransformCommand::new(text::transform::to_cw))
                             .add_handler("/user", handle_user),
                     )
-                    .run(api.clone(), UpdateMethod::poll(UpdatesStream::new(api)))
+                    .run(api, update_method)
             })
     }));
 }

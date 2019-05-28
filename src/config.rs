@@ -3,6 +3,7 @@ use failure::{Error, Fail};
 use std::{
     env::{var, VarError},
     ffi::OsString,
+    net::SocketAddr,
     num::ParseIntError,
     str::FromStr,
 };
@@ -11,6 +12,7 @@ use std::{
 pub struct Config {
     token: String,
     proxy: Option<String>,
+    pub webhook_url: Option<(SocketAddr, String)>,
     pub redis_url: String,
     pub chat_id: Integer,
     pub shippering_pair_timeout: u64,
@@ -19,9 +21,20 @@ pub struct Config {
 
 impl Config {
     pub fn from_env() -> Result<Self, Error> {
+        let webhook_url = match get_var_string_opt("RUSTJERKBOT_WEBHOOK_ADDRESS")? {
+            Some(addr) => {
+                let addr = addr.parse::<SocketAddr>()?;
+                let path = get_var_string_opt("RUSTJERKBOT_WEBHOOK_PATH")?
+                    .unwrap_or_else(|| String::from("/"));
+                Some((addr, path))
+            }
+            None => None,
+        };
+
         Ok(Config {
             token: get_var_string("RUSTJERKBOT_TOKEN")?,
             proxy: get_var_string_opt("RUSTJERKBOT_PROXY")?,
+            webhook_url,
             redis_url: get_var_string("RUSTJERKBOT_REDIS_URL")?,
             chat_id: get_var_number("RUSTJERKBOT_CHAT_ID")?,
             shippering_pair_timeout: get_var_number("RUSTJERKBOT_SHIPPERING_PAIR_TIMEOUT")?,
