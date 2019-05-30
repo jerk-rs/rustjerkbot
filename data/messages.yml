@@ -176,13 +176,6 @@ text:
             ]
         },
         {
-            input: '(?i)php|пхп',
-            reply_to: false,
-            output: [
-                '@PandaThePanda @tontipanda'
-            ]
-        },
-        {
             input: '^(вим|[иеэ]м[аэ]кс|vim|emacs)$',
             output: [
                 'с вимом хоть понятно за что его любить, там необычный подход к редактированию
