@@ -14,6 +14,9 @@ pub fn transform(orig: &str) -> TransformResult<String> {
             result += word;
         }
     }
+    if result == orig {
+        result = String::from("*ALREADY HUFIED*");
+    }
     Ok(result)
 }
 
