@@ -15,7 +15,7 @@ pub fn transform(orig: &str) -> TransformResult<String> {
         }
     }
     if result == orig {
-        result = String::from("*ALREADY HUFIED*");
+        result = String::from("*ALREADY HUIFIED*");
     }
     Ok(result)
 }
@@ -87,7 +87,7 @@ mod tests {
                 "хуяутизм и хуеградация",
             ),
             ("ху", "хую"),
-            ("хуякс", "хуякс"),
+            ("хуякс", "*ALREADY HUIFIED*"),
         ] {
             assert_eq!(transform(input).unwrap(), expected);
         }
