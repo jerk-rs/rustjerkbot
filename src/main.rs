@@ -10,6 +10,7 @@ use futures::{future, Future};
 
 mod autoresponse;
 mod config;
+mod sed;
 mod shippering;
 mod store;
 mod text;
@@ -65,6 +66,7 @@ fn main() {
                     .add_handler(AccessHandler::new(access_policy))
                     .add_handler(FnHandler::from(setup_context))
                     .add_handler(FnHandler::from(tracker::handle_update))
+                    .add_handler(FnHandler::from(sed::handle_message))
                     .add_handler(AutoresponseHandler::new(msg_store))
                     .add_handler(
                         CommandsHandler::default()

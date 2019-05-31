@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::time::SystemTime;
 
 const NAMESPACE: &str = "rustjerkbot";
+const TRACK_MESSAGE_TIMEOUT: u32 = 172_800;
 
 #[derive(Clone)]
 pub struct Store {
@@ -108,6 +109,29 @@ impl Store {
                 }
                 None => Ok(None),
             })
+    }
+
+    pub fn track_message(
+        &self,
+        input_message_id: Integer,
+        result_message_id: Integer,
+    ) -> impl Future<Item = (), Error = Error> {
+        let mut cmd = redis::cmd("SETEX");
+        let key = format!("{}:{}", format_key("track_messages"), input_message_id);
+        cmd.arg(key);
+        cmd.arg(TRACK_MESSAGE_TIMEOUT);
+        cmd.arg(result_message_id);
+        self.query(cmd)
+    }
+
+    pub fn get_tracked_message(
+        &self,
+        input_message_id: Integer,
+    ) -> impl Future<Item = Option<Integer>, Error = Error> {
+        let mut cmd = redis::cmd("GET");
+        let key = format!("{}:{}", format_key("track_messages"), input_message_id);
+        cmd.arg(key);
+        self.query(cmd)
     }
 
     fn query<V>(&self, cmd: Cmd) -> impl Future<Item = V, Error = Error>
