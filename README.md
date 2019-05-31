@@ -11,6 +11,10 @@
 - `RUSTJERKBOT_CHAT_ID` - Chat ID to work with
 - `RUSTJERKBOT_SHIPPERING_PAIR_TIMEOUT` - Timeout between pairs in seconds
 - `RUSTJERKBOT_SHIPPERING_MESSAGE_TIMEOUT` - Timeout between shippering messages in seconds
+- `RUSTJERKBOT_WEBHOOK_ADDRESS` - Server address for webhooks (`127.0.0.1` for example), optional.
+- `RUSTJERKBOT_WEBHOOK_PATH` - Path for webhooks, must start with `/`. It's recommended to use a random string. Default values is: `/`.
+
+If `RUSTJERKBOT_WEBHOOK_ADDRESS` is not specified, updates will be received using long-polling.
 
 ## LICENSE
 
