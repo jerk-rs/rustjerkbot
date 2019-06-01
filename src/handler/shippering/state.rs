@@ -1,4 +1,7 @@
-use crate::store::db::{Pair, Store, UserData};
+use crate::{
+    entities::{Pair, UserData},
+    store::db::Store,
+};
 use carapax::core::{
     methods::GetChatMember,
     types::{ChatMember, Integer},

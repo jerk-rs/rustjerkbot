@@ -1,7 +1,4 @@
-use crate::{
-    handler::shippering::state::ShipperingState,
-    store::db::{Pair, Store},
-};
+use crate::{entities::Pair, handler::shippering::state::ShipperingState, store::db::Store};
 use carapax::core::{
     types::{Integer, ResponseError},
     Api,

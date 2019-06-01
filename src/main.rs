@@ -9,6 +9,7 @@ use env_logger;
 use futures::{future, Future};
 
 mod config;
+mod entities;
 mod handler;
 mod store;
 mod utils;
