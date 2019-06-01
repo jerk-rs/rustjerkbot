@@ -1,10 +1,10 @@
 use crate::{
     config::Config,
-    shippering::{
-        future::ShipperingFuture,
-        template::{TemplateKind, TemplateStore},
+    shippering::future::ShipperingFuture,
+    store::{
+        db::Store,
+        shippering::{TemplateKind, TemplateStore},
     },
-    store::Store,
     utils::futures_ordered,
 };
 use carapax::{
@@ -48,13 +48,13 @@ impl CommandHandler for ShipperingHandler {
                 config.shippering_message_timeout,
             )
         };
-        let store = context.get::<Store>().clone();
+        let db_store = context.get::<Store>().clone();
         let tpl_store = self.store.clone();
         let chat_id = message.get_chat_id();
         let parse_mode = ParseMode::Html;
 
         HandlerFuture::new(
-            ShipperingFuture::new(api.clone(), store.clone(), chat_id, pair_timeout).and_then(
+            ShipperingFuture::new(api.clone(), db_store.clone(), chat_id, pair_timeout).and_then(
                 move |pair| -> Box<Future<Item = HandlerResult, Error = Error> + Send> {
                     match pair {
                         Some(pair) => {

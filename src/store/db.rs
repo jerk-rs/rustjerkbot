@@ -24,7 +24,7 @@ impl Store {
                 client
                     .get_shared_async_connection()
                     .from_err()
-                    .map(|conn| Store { conn })
+                    .map(|conn| Self { conn })
             })
     }
 

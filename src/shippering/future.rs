@@ -1,6 +1,6 @@
 use crate::{
     shippering::state::ShipperingState,
-    store::{Pair, Store},
+    store::db::{Pair, Store},
 };
 use carapax::core::{
     types::{Integer, ResponseError},
@@ -14,17 +14,17 @@ use rand::{seq::SliceRandom, thread_rng};
 #[must_use = "futures do nothing unless polled"]
 pub(super) struct ShipperingFuture {
     api: Api,
-    store: Store,
+    db_store: Store,
     state: ShipperingState,
     chat_id: Integer,
 }
 
 impl ShipperingFuture {
-    pub(super) fn new(api: Api, store: Store, chat_id: Integer, pair_timeout: u64) -> Self {
-        let state = ShipperingState::FindPair(Box::new(store.find_last_pair(pair_timeout)));
+    pub(super) fn new(api: Api, db_store: Store, chat_id: Integer, pair_timeout: u64) -> Self {
+        let state = ShipperingState::FindPair(Box::new(db_store.find_last_pair(pair_timeout)));
         Self {
             api,
-            store,
+            db_store,
             state,
             chat_id,
         }
@@ -43,7 +43,7 @@ impl Future for ShipperingFuture {
                     if let Some(pair) = maybe_pair {
                         return Ok(Async::Ready(Some(pair)));
                     } else {
-                        self.state.switch_to_get_users(&self.store);
+                        self.state.switch_to_get_users(&self.db_store);
                     }
                 }
                 ShipperingState::GetUsers(ref mut f) => {
@@ -79,7 +79,7 @@ impl Future for ShipperingFuture {
                             {
                                 false
                             } else {
-                                return Err(From::from(e));
+                                return Err(e);
                             }
                         }
                     };
@@ -92,7 +92,7 @@ impl Future for ShipperingFuture {
                         );
                     } else {
                         self.state
-                            .switch_to_del_users(&self.store, &[active_user_id]);
+                            .switch_to_del_users(&self.db_store, &[active_user_id]);
                     }
                 }
                 ShipperingState::GetPassiveMember {
@@ -111,31 +111,31 @@ impl Future for ShipperingFuture {
                             {
                                 false
                             } else {
-                                return Err(From::from(e));
+                                return Err(e);
                             }
                         }
                     };
                     if is_member {
                         self.state.switch_to_load_pair(
-                            &self.store,
+                            &self.db_store,
                             active_user_id,
                             passive_user_id,
                         );
                     } else {
                         self.state
-                            .switch_to_del_users(&self.store, &[passive_user_id]);
+                            .switch_to_del_users(&self.db_store, &[passive_user_id]);
                     }
                 }
                 ShipperingState::DelUsers(ref mut f) => {
                     try_ready!(f.poll());
-                    self.state.switch_to_get_users(&self.store);
+                    self.state.switch_to_get_users(&self.db_store);
                 }
                 ShipperingState::LoadPair(ref mut f) => {
                     let pair = try_ready!(f.poll());
                     match pair {
                         (Some(active_user), Some(passive_user)) => {
                             self.state.switch_to_save_pair(
-                                &self.store,
+                                &self.db_store,
                                 Pair::new(active_user, passive_user)?,
                             );
                         }

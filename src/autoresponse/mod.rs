@@ -1,3 +1,4 @@
+use crate::store::autoresponse::MessageStore;
 use carapax::{
     context::Context,
     core::{
@@ -13,18 +14,14 @@ use futures::{
 };
 use std::sync::Arc;
 
-mod message;
-
-pub use self::message::MessageStore;
-
 pub struct AutoresponseHandler {
-    store: Arc<MessageStore>,
+    msg_store: Arc<MessageStore>,
 }
 
 impl AutoresponseHandler {
-    pub fn new(store: MessageStore) -> Self {
+    pub fn new(msg_store: MessageStore) -> Self {
         Self {
-            store: Arc::new(store),
+            msg_store: Arc::new(msg_store),
         }
     }
 }
@@ -36,14 +33,14 @@ impl Handler for AutoresponseHandler {
     fn handle(&self, context: &mut Context, message: Self::Input) -> Self::Output {
         let chat_id = message.get_chat_id();
         let api = context.get::<Api>().clone();
-        let store = self.store.clone();
+        let msg_store = self.msg_store.clone();
         let reply_to_message_id = match message.reply_to {
             Some(ref x) => x.id,
             None => message.id,
         };
         let reply = message
             .get_text()
-            .and_then(|text| store.find_for_text(&text.data))
+            .and_then(|text| msg_store.find_for_text(&text.data))
             .map(|reply| {
                 (
                     if reply.reply_to {
@@ -60,9 +57,9 @@ impl Handler for AutoresponseHandler {
                         .iter()
                         .next()
                         .and_then(|user| {
-                            store
+                            msg_store
                                 .find_for_new_member_user(user)
-                                .or_else(|| store.find_for_new_member())
+                                .or_else(|| msg_store.find_for_new_member())
                         })
                         .map(|text| (message.id, text))
                 } else {

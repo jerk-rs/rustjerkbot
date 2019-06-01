@@ -1,4 +1,4 @@
-use crate::store::Store;
+use crate::store::db::Store;
 use carapax::{
     context::Context,
     core::{
@@ -20,7 +20,7 @@ pub fn handle_message(context: &mut Context, message: Message) -> HandlerFuture 
         None => None,
     };
     let api = context.get::<Api>().clone();
-    let store = context.get::<Store>().clone();
+    let db_store = context.get::<Store>().clone();
     let chat_id = message.get_chat_id();
     let is_edited = message.is_edited();
     if let (Some(commands), Some((reply_to_id, text))) = (message.get_text(), source) {
@@ -39,7 +39,7 @@ pub fn handle_message(context: &mut Context, message: Message) -> HandlerFuture 
 
         HandlerFuture::new(if is_edited {
             Either::A(
-                store
+                db_store
                     .get_tracked_message(message.id)
                     .and_then(move |message_id| {
                         if let Some(message_id) = message_id {
@@ -56,7 +56,7 @@ pub fn handle_message(context: &mut Context, message: Message) -> HandlerFuture 
             Either::B(
                 api.execute(SendMessage::new(chat_id, reply_text).reply_to_message_id(reply_to_id))
                     .and_then(move |result_message| {
-                        store
+                        db_store
                             .track_message(message.id, result_message.id)
                             .map(|()| HandlerResult::Continue)
                     }),

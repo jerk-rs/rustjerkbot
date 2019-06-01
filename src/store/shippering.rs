@@ -11,7 +11,6 @@ struct RawTemplateStore {
     new: Vec<String>,
 }
 
-/// Store for `.liquid` templates
 pub struct TemplateStore {
     found: Template,
     not_found: String,

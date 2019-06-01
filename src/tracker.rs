@@ -1,4 +1,4 @@
-use crate::{config::Config, store::Store};
+use crate::{config::Config, store::db::Store};
 use carapax::{
     context::Context,
     core::{methods::GetChatMember, types::Update, Api},
@@ -13,10 +13,10 @@ pub fn handle_update(context: &mut Context, update: Update) -> HandlerFuture {
         let config = context.get::<Config>();
         if config.chat_id == chat_id {
             let api = context.get::<Api>();
-            let store = context.get::<Store>().clone();
+            let db_store = context.get::<Store>().clone();
             return HandlerFuture::new(api.execute(GetChatMember::new(chat_id, user_id)).and_then(
                 move |member| {
-                    store
+                    db_store
                         .set_user(member.user().clone())
                         .map(|()| HandlerResult::Continue)
                 },

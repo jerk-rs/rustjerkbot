@@ -1,4 +1,4 @@
-use crate::store::{Pair, Store, UserData};
+use crate::store::db::{Pair, Store, UserData};
 use carapax::core::{
     methods::GetChatMember,
     types::{ChatMember, Integer},
@@ -36,10 +36,10 @@ pub(super) enum ShipperingState {
 }
 
 impl ShipperingState {
-    pub(super) fn switch_to_get_users(&mut self, store: &Store) {
+    pub(super) fn switch_to_get_users(&mut self, db_store: &Store) {
         mem::replace(
             self,
-            ShipperingState::GetUsers(Box::new(store.get_user_ids())),
+            ShipperingState::GetUsers(Box::new(db_store.get_user_ids())),
         );
     }
 
@@ -77,32 +77,32 @@ impl ShipperingState {
         );
     }
 
-    pub(super) fn switch_to_del_users(&mut self, store: &Store, user_ids: &[Integer]) {
+    pub(super) fn switch_to_del_users(&mut self, db_store: &Store, user_ids: &[Integer]) {
         mem::replace(
             self,
-            ShipperingState::DelUsers(Box::new(store.del_users(user_ids))),
+            ShipperingState::DelUsers(Box::new(db_store.del_users(user_ids))),
         );
     }
 
-    pub(super) fn switch_to_save_pair(&mut self, store: &Store, pair: Pair) {
+    pub(super) fn switch_to_save_pair(&mut self, db_store: &Store, pair: Pair) {
         mem::replace(
             self,
-            ShipperingState::SavePair(Box::new(store.save_pair(pair))),
+            ShipperingState::SavePair(Box::new(db_store.save_pair(pair))),
         );
     }
 
     pub(super) fn switch_to_load_pair(
         &mut self,
-        store: &Store,
+        db_store: &Store,
         active_user_id: Integer,
         passive_user_id: Integer,
     ) {
         mem::replace(
             self,
             ShipperingState::LoadPair(Box::new(
-                store
+                db_store
                     .get_user(active_user_id)
-                    .join(store.get_user(passive_user_id)),
+                    .join(db_store.get_user(passive_user_id)),
             )),
         );
     }

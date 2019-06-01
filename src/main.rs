@@ -19,10 +19,10 @@ mod user;
 mod utils;
 
 use self::{
-    autoresponse::{AutoresponseHandler, MessageStore},
+    autoresponse::AutoresponseHandler,
     config::Config,
-    shippering::{ShipperingHandler, TemplateStore},
-    store::Store,
+    shippering::ShipperingHandler,
+    store::{autoresponse::MessageStore, db::Store, shippering::TemplateStore},
     text::TransformCommand,
     user::handle_user,
 };
