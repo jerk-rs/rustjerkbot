@@ -5,7 +5,7 @@ use carapax::{
 };
 use futures::Future;
 
-pub fn handle_user(context: &mut Context, message: Message, _args: Vec<String>) -> HandlerFuture {
+pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>) -> HandlerFuture {
     let user = match message.reply_to {
         Some(ref reply_to) => reply_to.get_user(),
         None => message.get_user(),

@@ -14,7 +14,7 @@ use futures::{
 };
 use sedregex::find_and_replace;
 
-pub fn handle_message(context: &mut Context, message: Message) -> HandlerFuture {
+pub fn replace_text_handler(context: &mut Context, message: Message) -> HandlerFuture {
     let source = match message.reply_to {
         Some(ref reply_to) => reply_to.get_text().map(|text| (reply_to.id, text)),
         None => None,

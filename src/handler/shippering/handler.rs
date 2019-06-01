@@ -1,6 +1,6 @@
 use crate::{
     config::Config,
-    shippering::future::ShipperingFuture,
+    handler::shippering::future::ShipperingFuture,
     store::{
         db::Store,
         shippering::{TemplateKind, TemplateStore},

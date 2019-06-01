@@ -8,23 +8,21 @@ use dotenv::dotenv;
 use env_logger;
 use futures::{future, Future};
 
-mod autoresponse;
 mod config;
-mod sed;
-mod shippering;
+mod handler;
 mod store;
-mod text;
-mod tracker;
-mod user;
 mod utils;
 
 use self::{
-    autoresponse::AutoresponseHandler,
     config::Config,
-    shippering::ShipperingHandler,
+    handler::{
+        autoresponse::AutoresponseHandler,
+        shippering::ShipperingHandler,
+        text::{replace_text_handler, TransformCommand},
+        tracker::track_chat_member,
+        user::get_user_info,
+    },
     store::{autoresponse::MessageStore, db::Store, shippering::TemplateStore},
-    text::TransformCommand,
-    user::handle_user,
 };
 
 fn main() {
@@ -65,29 +63,19 @@ fn main() {
                 App::new()
                     .add_handler(AccessHandler::new(access_policy))
                     .add_handler(FnHandler::from(setup_context))
-                    .add_handler(FnHandler::from(tracker::handle_update))
-                    .add_handler(FnHandler::from(sed::handle_message))
+                    .add_handler(FnHandler::from(track_chat_member))
+                    .add_handler(FnHandler::from(replace_text_handler))
                     .add_handler(AutoresponseHandler::new(msg_store))
                     .add_handler(
                         CommandsHandler::default()
                             .add_handler("/shippering", ShipperingHandler::new(tpl_store))
-                            .add_handler("/arrow", TransformCommand::new(text::transform::to_arrow))
-                            .add_handler(
-                                "/huify",
-                                TransformCommand::new(text::transform::to_huified)
-                                    .without_monospace_reply(),
-                            )
-                            .add_handler(
-                                "/reverse",
-                                TransformCommand::new(text::transform::to_reversed),
-                            )
-                            .add_handler(
-                                "/square",
-                                TransformCommand::new(text::transform::to_square),
-                            )
-                            .add_handler("/star", TransformCommand::new(text::transform::to_star))
-                            .add_handler("/cw", TransformCommand::new(text::transform::to_cw))
-                            .add_handler("/user", handle_user),
+                            .add_handler("/arrow", TransformCommand::arrow())
+                            .add_handler("/cw", TransformCommand::cw())
+                            .add_handler("/huify", TransformCommand::huify())
+                            .add_handler("/reverse", TransformCommand::reverse())
+                            .add_handler("/square", TransformCommand::square())
+                            .add_handler("/star", TransformCommand::star())
+                            .add_handler("/user", get_user_info),
                     )
                     .run(api, update_method)
             })

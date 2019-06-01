@@ -6,7 +6,7 @@ use carapax::{
 };
 use futures::Future;
 
-pub fn handle_update(context: &mut Context, update: Update) -> HandlerFuture {
+pub fn track_chat_member(context: &mut Context, update: Update) -> HandlerFuture {
     let user_id = update.get_user().map(|x| x.id);
     let chat_id = update.get_chat_id();
     if let (Some(user_id), Some(chat_id)) = (user_id, chat_id) {
