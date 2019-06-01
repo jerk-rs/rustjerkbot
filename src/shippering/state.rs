@@ -15,8 +15,18 @@ pub(super) enum ShipperingState {
     FindPair(Box<Future<Item = Option<Pair>, Error = Error> + Send>),
     /// Load all available user IDs from a store
     GetUsers(Box<Future<Item = Vec<Integer>, Error = Error> + Send>),
-    /// Get chat members from Telegram
-    GetMembers(Box<Future<Item = (ChatMember, ChatMember), Error = Error> + Send>),
+    /// Get chat member for active from Telegram
+    GetActiveMember {
+        active_user_id: Integer,
+        passive_user_id: Integer,
+        future: Box<Future<Item = ChatMember, Error = Error> + Send>,
+    },
+    /// Get chat member for passive from Telegram
+    GetPassiveMember {
+        active_user_id: Integer,
+        passive_user_id: Integer,
+        future: Box<Future<Item = ChatMember, Error = Error> + Send>,
+    },
     /// Delete non-members from store
     DelUsers(Box<Future<Item = (), Error = Error> + Send>),
     /// Load data for each user in pair
@@ -33,7 +43,7 @@ impl ShipperingState {
         );
     }
 
-    pub(super) fn switch_to_get_members(
+    pub(super) fn switch_to_get_active_member(
         &mut self,
         api: &Api,
         chat_id: Integer,
@@ -42,10 +52,28 @@ impl ShipperingState {
     ) {
         mem::replace(
             self,
-            ShipperingState::GetMembers(Box::new(
-                api.execute(GetChatMember::new(chat_id, active_user_id))
-                    .join(api.execute(GetChatMember::new(chat_id, passive_user_id))),
-            )),
+            ShipperingState::GetActiveMember {
+                active_user_id,
+                passive_user_id,
+                future: Box::new(api.execute(GetChatMember::new(chat_id, active_user_id))),
+            },
+        );
+    }
+
+    pub(super) fn switch_to_get_passive_member(
+        &mut self,
+        api: &Api,
+        chat_id: Integer,
+        active_user_id: Integer,
+        passive_user_id: Integer,
+    ) {
+        mem::replace(
+            self,
+            ShipperingState::GetPassiveMember {
+                active_user_id,
+                passive_user_id,
+                future: Box::new(api.execute(GetChatMember::new(chat_id, passive_user_id))),
+            },
         );
     }
 

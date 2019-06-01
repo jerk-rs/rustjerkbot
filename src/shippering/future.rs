@@ -2,7 +2,10 @@ use crate::{
     shippering::state::ShipperingState,
     store::{Pair, Store},
 };
-use carapax::core::{types::Integer, Api};
+use carapax::core::{
+    types::{Integer, ResponseError},
+    Api,
+};
 use failure::Error;
 use futures::{try_ready, Async, Future, Poll};
 use rand::{seq::SliceRandom, thread_rng};
@@ -50,7 +53,7 @@ impl Future for ShipperingFuture {
                         .collect();
                     if maybe_pair.len() == 2 {
                         let (active_user_id, passive_user_id) = (maybe_pair[0], maybe_pair[1]);
-                        self.state.switch_to_get_members(
+                        self.state.switch_to_get_active_member(
                             &self.api,
                             self.chat_id,
                             active_user_id,
@@ -60,28 +63,67 @@ impl Future for ShipperingFuture {
                         return Ok(Async::Ready(None));
                     }
                 }
-                ShipperingState::GetMembers(ref mut f) => {
-                    let (active_member, passive_member) = try_ready!(f.poll());
-                    let has_active = active_member.is_member();
-                    let has_passive = passive_member.is_member();
-                    let active_user_id = active_member.user().id;
-                    let passive_user_id = passive_member.user().id;
-                    if has_active && has_passive {
+                ShipperingState::GetActiveMember {
+                    active_user_id,
+                    passive_user_id,
+                    future: ref mut f,
+                } => {
+                    let is_member = match f.poll() {
+                        Ok(Async::Ready(chat_member)) => chat_member.is_member(),
+                        Ok(Async::NotReady) => return Ok(Async::NotReady),
+                        Err(e) => {
+                            if let Some(ResponseError {
+                                error_code: Some(400),
+                                ..
+                            }) = e.downcast_ref::<ResponseError>()
+                            {
+                                false
+                            } else {
+                                return Err(From::from(e));
+                            }
+                        }
+                    };
+                    if is_member {
+                        self.state.switch_to_get_passive_member(
+                            &self.api,
+                            self.chat_id,
+                            active_user_id,
+                            passive_user_id,
+                        );
+                    } else {
+                        self.state
+                            .switch_to_del_users(&self.store, &[active_user_id]);
+                    }
+                }
+                ShipperingState::GetPassiveMember {
+                    active_user_id,
+                    passive_user_id,
+                    future: ref mut f,
+                } => {
+                    let is_member = match f.poll() {
+                        Ok(Async::Ready(chat_member)) => chat_member.is_member(),
+                        Ok(Async::NotReady) => return Ok(Async::NotReady),
+                        Err(e) => {
+                            if let Some(ResponseError {
+                                error_code: Some(400),
+                                ..
+                            }) = e.downcast_ref::<ResponseError>()
+                            {
+                                false
+                            } else {
+                                return Err(From::from(e));
+                            }
+                        }
+                    };
+                    if is_member {
                         self.state.switch_to_load_pair(
                             &self.store,
                             active_user_id,
                             passive_user_id,
                         );
                     } else {
-                        let mut user_ids = vec![];
-                        if !has_active {
-                            user_ids.push(active_user_id);
-                        }
-                        if !has_passive {
-                            user_ids.push(passive_user_id);
-                        }
-                        assert!(!user_ids.is_empty());
-                        self.state.switch_to_del_users(&self.store, &user_ids);
+                        self.state
+                            .switch_to_del_users(&self.store, &[passive_user_id]);
                     }
                 }
                 ShipperingState::DelUsers(ref mut f) => {
