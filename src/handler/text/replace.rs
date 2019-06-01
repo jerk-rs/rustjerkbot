@@ -36,6 +36,13 @@ pub fn replace_text_handler(context: &mut Context, message: Message) -> HandlerF
             Ok(reply_text) => (reply_to_id, reply_text.to_string()),
             Err(err) => (message.id, err.to_string()),
         };
+        let reply_text = if reply_text.is_empty() {
+            String::from("Result text can not be empty")
+        } else if reply_text.len() > 4096 {
+            String::from("Result text can not exceed 4096 characters")
+        } else {
+            reply_text
+        };
 
         HandlerFuture::new(if is_edited {
             Either::A(
