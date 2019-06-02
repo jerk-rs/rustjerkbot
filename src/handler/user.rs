@@ -1,9 +1,5 @@
-use carapax::{
-    context::Context,
-    core::{methods::SendMessage, types::Message, Api},
-    HandlerFuture, HandlerResult,
-};
-use futures::Future;
+use crate::sender::MessageSender;
+use carapax::{context::Context, core::types::Message, HandlerFuture};
 
 pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>) -> HandlerFuture {
     let user = match message.reply_to {
@@ -17,9 +13,5 @@ pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>
         ),
         None => String::from("No user found in a message"),
     };
-    let api = context.get::<Api>().clone();
-    HandlerFuture::new(
-        api.execute(SendMessage::new(message.get_chat_id(), data).reply_to_message_id(message.id))
-            .map(|_| HandlerResult::Continue),
-    )
+    context.get::<MessageSender>().send(&message, data)
 }

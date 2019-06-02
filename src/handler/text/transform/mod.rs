@@ -2,19 +2,8 @@ use self::{
     arrow::Arrow, base::TransformText, cw::Cw, huify::Huify, reverse::Reverse, square::Square,
     star::Star,
 };
-use carapax::{
-    context::Context,
-    core::{
-        methods::SendMessage,
-        types::{Message, ParseMode},
-        Api,
-    },
-    CommandHandler, HandlerFuture, HandlerResult,
-};
-use futures::{
-    future::{self, Either},
-    Future,
-};
+use crate::sender::MessageSender;
+use carapax::{context::Context, core::types::Message, CommandHandler, HandlerFuture};
 
 mod arrow;
 mod base;
@@ -90,48 +79,30 @@ where
     type Output = HandlerFuture;
 
     fn handle(&self, context: &mut Context, message: Message, args: Vec<String>) -> Self::Output {
-        let chat_id = message.get_chat_id();
-        let message_id = match message.reply_to {
-            Some(ref reply_to) => reply_to.id,
-            None => message.id,
-        };
         let maybe_text = args.join(" ");
         let maybe_text = maybe_text.trim();
         let maybe_text = if maybe_text.is_empty() {
-            message
-                .reply_to
-                .and_then(|x| x.get_text().map(|x| x.data.clone()))
+            match message.reply_to {
+                Some(ref reply_to) => reply_to.get_text().map(|x| x.data.clone()),
+                None => None,
+            }
         } else {
             Some(String::from(maybe_text))
         };
-        let monospace = self.monospace_reply;
-        let api = context.get::<Api>().clone();
-        HandlerFuture::new(if let Some(text) = maybe_text {
-            Either::A(
-                future::result(self.transformer.transform(&text))
-                    .from_err()
-                    .and_then(move |text| {
-                        let text = if monospace {
-                            format!("```\n{}\n```", text)
-                        } else {
-                            text
-                        };
-                        api.execute(
-                            SendMessage::new(chat_id, text)
-                                .reply_to_message_id(message_id)
-                                .parse_mode(ParseMode::Markdown),
-                        )
-                        .map(|_| HandlerResult::Continue)
-                    }),
-            )
+        let text = if let Some(text) = maybe_text {
+            match self.transformer.transform(&text) {
+                Ok(text) => {
+                    if self.monospace_reply {
+                        format!("```\n{}\n```", text)
+                    } else {
+                        text
+                    }
+                }
+                Err(err) => err.to_string(),
+            }
         } else {
-            Either::B(
-                api.execute(
-                    SendMessage::new(chat_id, "You should provide some text")
-                        .reply_to_message_id(message_id),
-                )
-                .map(|_| HandlerResult::Continue),
-            )
-        })
+            String::from("You should provide some text")
+        };
+        context.get::<MessageSender>().send(&message, text)
     }
 }

@@ -11,6 +11,7 @@ use futures::{future, Future};
 mod config;
 mod entities;
 mod handler;
+mod sender;
 mod store;
 mod utils;
 
@@ -24,6 +25,7 @@ use self::{
         tracker::track_chat_member,
         user::get_user_info,
     },
+    sender::MessageSender,
     store::{autoresponse::MessageStore, db::Store, shippering::TemplateStore},
 };
 
@@ -58,9 +60,11 @@ fn main() {
         Store::open(config.redis_url.clone())
             .map_err(|e| log::error!("Unable to open store: {:?}", e))
             .and_then(move |store| {
+                let message_sender = MessageSender::new(api.clone(), store.clone());
                 let setup_context = move |context: &mut Context, _update: Update| {
                     context.set(store.clone());
                     context.set(config.clone());
+                    context.set(message_sender.clone())
                 };
                 App::new()
                     .add_handler(AccessHandler::new(access_policy))
