@@ -18,6 +18,7 @@ use self::{
     config::Config,
     handler::{
         autoresponse::AutoresponseHandler,
+        ferris::handle_ferris,
         shippering::ShipperingHandler,
         text::{replace_text_handler, TransformCommand},
         tracker::track_chat_member,
@@ -72,6 +73,7 @@ fn main() {
                             .add_handler("/shippering", ShipperingHandler::new(tpl_store))
                             .add_handler("/arrow", TransformCommand::arrow())
                             .add_handler("/cw", TransformCommand::cw())
+                            .add_handler("/fsays", handle_ferris)
                             .add_handler("/huify", TransformCommand::huify())
                             .add_handler("/reverse", TransformCommand::reverse())
                             .add_handler("/square", TransformCommand::square())
