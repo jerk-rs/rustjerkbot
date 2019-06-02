@@ -10,15 +10,15 @@ use carapax::{
 use futures::Future;
 
 const FERRIS: &str = r#"
-              \
-               \
-                  _~^~^~_
-              \) /  o o  \ (/
-                '_   -   _'
-                / '-----' \
+          \
+           \
+              _~^~^~_
+          \) /  o o  \ (/
+            '_   -   _'
+            / '-----' \
 "#;
 
-const WIDTH: usize = 24;
+const WIDTH: usize = 15;
 
 fn say(input: &str, width: usize) -> String {
     let mut result = String::new();
