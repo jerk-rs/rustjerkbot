@@ -7,10 +7,38 @@ use carapax::{
     },
     HandlerFuture, HandlerResult,
 };
-use ferris_says::say;
 use futures::Future;
 
+const FERRIS: &str = r#"
+              \
+               \
+                  _~^~^~_
+              \) /  o o  \ (/
+                '_   -   _'
+                / '-----' \
+"#;
+
 const WIDTH: usize = 24;
+
+fn say(input: &str, width: usize) -> String {
+    let mut result = String::new();
+    let bar_buffer: String = std::iter::repeat('-').take(width + 4).collect();
+    result += &bar_buffer;
+    result.push('\n');
+    for i in input.split(|x: char| x == '\n') {
+        for j in i.chars().collect::<Vec<char>>().as_slice().chunks(width) {
+            result += "| ";
+            result.extend(j);
+            for _ in 0..width - j.len() {
+                result.push(' ');
+            }
+            result += " |\n";
+        }
+    }
+    result += &bar_buffer;
+    result += FERRIS;
+    result
+}
 
 pub fn handle_ferris(context: &mut Context, message: Message, args: Vec<String>) -> HandlerFuture {
     let maybe_text = args.join(" ");
@@ -21,14 +49,7 @@ pub fn handle_ferris(context: &mut Context, message: Message, args: Vec<String>)
         String::from(maybe_text)
     };
     let api = context.get::<Api>().clone();
-    let mut output_text = Vec::<u8>::new();
-    let result = match say(input_text.as_bytes(), WIDTH, &mut output_text) {
-        Ok(()) => match String::from_utf8(output_text) {
-            Ok(text) => text,
-            Err(e) => e.to_string(),
-        },
-        Err(e) => e.to_string(),
-    };
+    let result = say(&input_text, WIDTH);
     let result = format!("```\n{}\n```", result);
     let chat_id = message.get_chat_id();
     let message_id = match message.reply_to {
