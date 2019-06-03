@@ -220,6 +220,13 @@ text:
             ]
         },
         {
+            input: '(?i)кадыров',
+            reply_to: false,
+            output: [
+                '*АХМАТ СИЛА!*'
+            ]
+        },
+        {
             input: '(?i)кто такой жуковский',
             reply_to: false,
             output: [
