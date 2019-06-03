@@ -2,7 +2,7 @@ use self::{
     arrow::Arrow, base::TransformText, cw::Cw, huify::Huify, reverse::Reverse, square::Square,
     star::Star,
 };
-use crate::sender::MessageSender;
+use crate::sender::{MessageSender, ReplyTo};
 use carapax::{context::Context, core::types::Message, CommandHandler, HandlerFuture};
 
 mod arrow;
@@ -103,6 +103,8 @@ where
         } else {
             String::from("You should provide some text")
         };
-        context.get::<MessageSender>().send(&message, text)
+        context
+            .get::<MessageSender>()
+            .send(&message, text, ReplyTo::Reply)
     }
 }

@@ -1,4 +1,7 @@
-use crate::{sender::MessageSender, store::autoresponse::MessageStore};
+use crate::{
+    sender::{MessageSender, ReplyTo},
+    store::autoresponse::MessageStore,
+};
 use carapax::{
     context::Context,
     core::types::{Message, MessageData},
@@ -28,19 +31,30 @@ impl Handler for AutoresponseHandler {
         message
             .get_text()
             .and_then(|text| msg_store.find_for_text(&text.data))
-            .map(|reply| reply.message)
+            .map(|reply| (reply.message, reply.reply_to))
             .or_else(|| {
                 if let MessageData::NewChatMembers(ref users) = message.data {
                     users.iter().next().and_then(|user| {
                         msg_store
                             .find_for_new_member_user(user)
                             .or_else(|| msg_store.find_for_new_member())
+                            .map(|text| (text, true))
                     })
                 } else {
                     None
                 }
             })
-            .map(|text| message_sender.send(&message, text))
+            .map(|(text, reply_to)| {
+                message_sender.send(
+                    &message,
+                    text,
+                    if reply_to {
+                        ReplyTo::Reply
+                    } else {
+                        ReplyTo::Incoming
+                    },
+                )
+            })
             .unwrap_or_else(|| HandlerResult::Continue.into())
     }
 }

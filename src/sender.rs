@@ -26,14 +26,22 @@ impl MessageSender {
     ///
     /// * incoming_message - Message from update to track to
     /// * text - Text to send
-    pub fn send(&self, incoming_message: &Message, text: String) -> HandlerFuture {
+    pub fn send(
+        &self,
+        incoming_message: &Message,
+        text: String,
+        reply_to: ReplyTo,
+    ) -> HandlerFuture {
         let db_store = self.db_store.clone();
         let api = self.api.clone();
         let chat_id = incoming_message.get_chat_id();
         let incoming_message_id = incoming_message.id;
-        let reply_to_id = match incoming_message.reply_to {
-            Some(ref reply_to) => reply_to.id,
-            None => incoming_message_id,
+        let reply_to_id = match reply_to {
+            ReplyTo::Incoming => incoming_message_id,
+            ReplyTo::Reply => match incoming_message.reply_to {
+                Some(ref reply_to) => reply_to.id,
+                None => incoming_message_id,
+            },
         };
 
         macro_rules! send_new {
@@ -71,4 +79,12 @@ impl MessageSender {
             HandlerFuture::new(send_new!())
         }
     }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum ReplyTo {
+    /// Reply to incoming message
+    Incoming,
+    /// Reply to `reply_to` message if exists
+    Reply,
 }

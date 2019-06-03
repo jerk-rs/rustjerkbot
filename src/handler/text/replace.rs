@@ -1,4 +1,4 @@
-use crate::sender::MessageSender;
+use crate::sender::{MessageSender, ReplyTo};
 use carapax::{context::Context, core::types::Message, HandlerFuture, HandlerResult};
 use sedregex::find_and_replace;
 
@@ -29,6 +29,7 @@ pub fn replace_text_handler(context: &mut Context, message: Message) -> HandlerF
             } else {
                 reply_text
             },
+            ReplyTo::Reply,
         )
     } else {
         HandlerResult::Continue.into()

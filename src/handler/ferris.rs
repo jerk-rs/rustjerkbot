@@ -1,4 +1,4 @@
-use crate::sender::MessageSender;
+use crate::sender::{MessageSender, ReplyTo};
 use carapax::{context::Context, core::types::Message, HandlerFuture};
 
 const FERRIS: &str = r#"
@@ -51,7 +51,9 @@ pub fn handle_ferris(context: &mut Context, message: Message, args: Vec<String>)
     } else {
         String::from(maybe_text)
     };
-    context
-        .get::<MessageSender>()
-        .send(&message, format!("```\n{}\n```", say(&input_text, WIDTH)))
+    context.get::<MessageSender>().send(
+        &message,
+        format!("```\n{}\n```", say(&input_text, WIDTH)),
+        ReplyTo::Reply,
+    )
 }

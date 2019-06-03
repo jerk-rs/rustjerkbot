@@ -1,4 +1,4 @@
-use crate::sender::MessageSender;
+use crate::sender::{MessageSender, ReplyTo};
 use carapax::{context::Context, core::types::Message, HandlerFuture};
 
 pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>) -> HandlerFuture {
@@ -13,5 +13,7 @@ pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>
         ),
         None => String::from("No user found in a message"),
     };
-    context.get::<MessageSender>().send(&message, data)
+    context
+        .get::<MessageSender>()
+        .send(&message, data, ReplyTo::Incoming)
 }
