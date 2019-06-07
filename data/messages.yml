@@ -135,6 +135,10 @@ text:
             output: ['https://telegra.ph/Rast-zaebis-tema-01-04']
         }
         - {
+            input: 'Пообедала ли ты на ночь, Анастейша?',
+            output: ['@anastaysha164']
+        }
+        - {
             input: 'ты тупой',
             reply_to: false,
             output: [
