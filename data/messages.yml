@@ -183,7 +183,8 @@ text:
             input: '(?i)php|пхп',
             reply_to: false,
             output: [
-                '@PandaThePanda @tontipanda'
+                '@PandaThePanda @tontipanda',
+                'https://youtu.be/JeuJvO2l-Uk'
             ]
         },
         {
