@@ -53,6 +53,19 @@ impl CommandHandler for ShipperingHandler {
         let chat_id = message.get_chat_id();
         let parse_mode = ParseMode::Html;
 
+        if let Some(ref user) = message.get_user() {
+            if tpl_store.is_user_banned(user.id) {
+                return HandlerFuture::new(
+                    api.execute(
+                        SendMessage::new(chat_id, "<b>POSHEL NAHUY</b>")
+                            .reply_to_message_id(message.id)
+                            .parse_mode(parse_mode),
+                    )
+                    .map(|_| HandlerResult::Continue),
+                );
+            }
+        }
+
         HandlerFuture::new(
             ShipperingFuture::new(api.clone(), db_store.clone(), chat_id, pair_timeout).and_then(
                 move |pair| -> Box<Future<Item = HandlerResult, Error = Error> + Send> {

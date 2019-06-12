@@ -9,12 +9,14 @@ struct RawTemplateStore {
     found: String,
     not_found: String,
     new: Vec<String>,
+    banned_users: Vec<i64>,
 }
 
 pub struct TemplateStore {
     found: Template,
     not_found: String,
     new: Vec<Template>,
+    banned_users: Vec<i64>,
 }
 
 impl TemplateStore {
@@ -34,7 +36,12 @@ impl TemplateStore {
             found,
             not_found,
             new,
+            banned_users: raw_store.banned_users,
         })
+    }
+
+    pub fn is_user_banned(&self, user_id: i64) -> bool {
+        self.banned_users.iter().any(|x| *x == user_id)
     }
 
     pub fn render_template(

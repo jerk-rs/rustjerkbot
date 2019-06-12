@@ -1,3 +1,5 @@
+banned_users:
+    - 131655111 # (((Sergey(not seresha)) Markizov @morekiss
 found: 'Пара уже найдена! Вот, полюбуйся на педиков: {{first}}, {{second}}.'
 not_found: 'Пара не найдена, попробуйте позже.'
 new:
