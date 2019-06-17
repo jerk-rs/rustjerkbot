@@ -53,7 +53,7 @@ pub fn handle_ferris(context: &mut Context, message: Message, args: Vec<String>)
     };
     context.get::<MessageSender>().send(
         &message,
-        format!("```\n{}\n```", say(&input_text, WIDTH)),
+        format!("<pre>{}\n</pre>", say(&input_text, WIDTH)),
         ReplyTo::Reply,
     )
 }

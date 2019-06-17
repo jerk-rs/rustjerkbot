@@ -67,7 +67,7 @@ impl Huify {
             }
         }
         if result == text {
-            result = String::from("*ALREADY HUIFIED*");
+            result = String::from("<b>ALREADY HUIFIED</b>");
         }
         result
     }

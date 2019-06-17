@@ -49,7 +49,7 @@ impl MessageSender {
                 api.execute(
                     SendMessage::new(chat_id, text)
                         .reply_to_message_id(reply_to_id)
-                        .parse_mode(ParseMode::Markdown),
+                        .parse_mode(ParseMode::Html),
                 )
                 .and_then(move |result_message| {
                     db_store
@@ -66,7 +66,7 @@ impl MessageSender {
                         Either::A(
                             api.execute(
                                 EditMessageText::new(chat_id, tracked_message_id, text)
-                                    .parse_mode(ParseMode::Markdown),
+                                    .parse_mode(ParseMode::Html),
                             )
                             .map(|_| HandlerResult::Continue),
                         )

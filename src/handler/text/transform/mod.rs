@@ -93,7 +93,7 @@ where
             match self.transformer.transform(&text) {
                 Ok(text) => {
                     if self.monospace_reply {
-                        format!("```\n{}\n```", text)
+                        format!("<pre>{}\n</pre>", text)
                     } else {
                         text
                     }
