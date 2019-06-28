@@ -131,6 +131,10 @@ text:
             ]
         }
         - {
+            input: 'помянем',
+            output: ['https://www.youtube.com/watch?v=7Fmuq91CCm4']
+        }
+        - {
             input: 'раст заебись тема',
             output: ['https://telegra.ph/Rast-zaebis-tema-01-04']
         }
