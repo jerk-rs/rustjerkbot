@@ -106,7 +106,7 @@ mod tests {
                 "хуяутизм и хуеградация",
             ),
             ("ху", "хую"),
-            ("хуякс", "*ALREADY HUIFIED*"),
+            ("хуякс", "<b>ALREADY HUIFIED</b>"),
         ] {
             assert_eq!(t.transform(input).unwrap(), expected);
         }
