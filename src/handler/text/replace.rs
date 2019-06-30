@@ -27,7 +27,7 @@ pub fn replace_text_handler(context: &mut Context, message: Message) -> HandlerF
             } else if reply_text.len() > 4096 {
                 String::from("Result text can not exceed 4096 characters")
             } else {
-                reply_text
+                ammonia::clean(&reply_text)
             },
             ReplyTo::Reply,
         )
