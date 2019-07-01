@@ -20,13 +20,16 @@ use self::{
     handler::{
         autoresponse::AutoresponseHandler,
         ferris::handle_ferris,
+        schedule::scheduled_handler,
         shippering::ShipperingHandler,
         text::{replace_text_handler, TransformCommand},
         tracker::track_chat_member,
         user::get_user_info,
     },
     sender::MessageSender,
-    store::{autoresponse::MessageStore, db::Store, shippering::TemplateStore},
+    store::{
+        autoresponse::MessageStore, db::Store, schedule::ScheduleStore, shippering::TemplateStore,
+    },
 };
 
 fn main() {
@@ -41,6 +44,9 @@ fn main() {
 
     let tpl_store =
         TemplateStore::from_file("data/shippering.yml").expect("Failed to create template store");
+
+    let schedule_store =
+        ScheduleStore::from_file("data/schedule.yml").expect("Failed to create schedule store");
 
     let access_rule = AccessRule::allow_chat(config.chat_id);
     let access_policy = InMemoryAccessPolicy::default().push_rule(access_rule);
@@ -60,6 +66,7 @@ fn main() {
         Store::open(config.redis_url.clone())
             .map_err(|e| log::error!("Unable to open store: {:?}", e))
             .and_then(move |store| {
+                scheduled_handler(config.chat_id, api.clone(), schedule_store);
                 let message_sender = MessageSender::new(api.clone(), store.clone());
                 let setup_context = move |context: &mut Context, _update: Update| {
                     context.set(store.clone());
