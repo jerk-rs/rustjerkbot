@@ -1,12 +1,13 @@
 use self::{
-    arrow::Arrow, base::TransformText, cw::Cw, huify::Huify, reverse::Reverse, square::Square,
-    star::Star,
+    arrow::Arrow, base::TransformText, chain::Chain, cw::Cw, huify::Huify, reverse::Reverse,
+    square::Square, star::Star,
 };
 use crate::sender::{MessageSender, ReplyTo};
 use carapax::{context::Context, core::types::Message, CommandHandler, HandlerFuture};
 
 mod arrow;
 mod base;
+mod chain;
 mod cw;
 mod huify;
 mod reverse;
@@ -40,6 +41,20 @@ impl TransformCommand<Huify> {
     pub fn huify() -> Self {
         Self {
             transformer: Huify::new(),
+            monospace_reply: false,
+        }
+    }
+}
+
+impl TransformCommand<Chain> {
+    pub fn jerkify() -> Self {
+        Self {
+            transformer: Chain::new(vec![
+                Box::new(Huify::new()),
+                Box::new(Reverse),
+                Box::new(Huify::new()),
+                Box::new(Reverse),
+            ]),
             monospace_reply: false,
         }
     }

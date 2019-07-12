@@ -85,6 +85,7 @@ fn main() {
                             .add_handler("/arrow", TransformCommand::arrow())
                             .add_handler("/cw", TransformCommand::cw())
                             .add_handler("/fsays", handle_ferris)
+                            .add_handler("/jerkify", TransformCommand::jerkify())
                             .add_handler("/huify", TransformCommand::huify())
                             .add_handler("/reverse", TransformCommand::reverse())
                             .add_handler("/square", TransformCommand::square())
