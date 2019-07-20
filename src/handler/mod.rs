@@ -1,4 +1,5 @@
 pub mod autoresponse;
+pub mod feed;
 pub mod ferris;
 pub mod schedule;
 pub mod shippering;

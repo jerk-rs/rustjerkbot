@@ -19,6 +19,7 @@ use self::{
     config::Config,
     handler::{
         autoresponse::AutoresponseHandler,
+        feed::feed_handler,
         ferris::handle_ferris,
         schedule::scheduled_handler,
         shippering::ShipperingHandler,
@@ -28,7 +29,8 @@ use self::{
     },
     sender::MessageSender,
     store::{
-        autoresponse::MessageStore, db::Store, schedule::ScheduleStore, shippering::TemplateStore,
+        autoresponse::MessageStore, db::Store, feed::FeedStore, schedule::ScheduleStore,
+        shippering::TemplateStore,
     },
 };
 
@@ -47,6 +49,8 @@ fn main() {
 
     let schedule_store =
         ScheduleStore::from_file("data/schedule.yml").expect("Failed to create schedule store");
+
+    let feed_store = FeedStore::new("data/feed.yml").expect("Failed to create feed store");
 
     let access_rule = AccessRule::allow_chat(config.chat_id);
     let access_policy = InMemoryAccessPolicy::default().push_rule(access_rule);
@@ -67,6 +71,7 @@ fn main() {
             .map_err(|e| log::error!("Unable to open store: {:?}", e))
             .and_then(move |store| {
                 scheduled_handler(config.chat_id, api.clone(), schedule_store);
+                feed_handler(config.chat_id, api.clone(), store.clone(), feed_store);
                 let message_sender = MessageSender::new(api.clone(), store.clone());
                 let setup_context = move |context: &mut Context, _update: Update| {
                     context.set(store.clone());

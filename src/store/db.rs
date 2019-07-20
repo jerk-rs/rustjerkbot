@@ -133,6 +133,24 @@ impl Store {
         self.query(cmd)
     }
 
+    /// Allows to save an rss/atom feed entry in order to not send it twice
+    pub fn track_feed_entry(&self, entry: &str) -> impl Future<Item = (), Error = Error> {
+        let mut cmd = redis::cmd("SADD");
+        let key = format_key("track_feed_entries");
+        cmd.arg(key);
+        cmd.arg(entry);
+        self.query::<i64>(cmd).map(|_| ())
+    }
+
+    /// Whether an rss/atom feed entry was sent
+    pub fn has_feed_entry(&self, entry: &str) -> impl Future<Item = bool, Error = Error> {
+        let mut cmd = redis::cmd("SISMEMBER");
+        let key = format_key("track_feed_entries");
+        cmd.arg(key);
+        cmd.arg(entry);
+        self.query::<i64>(cmd).map(|count| count == 1)
+    }
+
     fn query<V>(&self, cmd: Cmd) -> impl Future<Item = V, Error = Error>
     where
         V: FromRedisValue + Send + 'static,
