@@ -304,5 +304,10 @@ text:
                 '<b>DA TY OHUEL</b>',
                 '#читайвесьджерксука'
             ]
+        },
+        {
+            input: '(?i)чени',
+            reply_to: false,
+            output: ['хуени']
         }
     ]
