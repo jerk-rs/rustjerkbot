@@ -35,10 +35,6 @@ text:
             input: 'nlinker',
             output: ['t.me/rustjerk/317962']
         }
-        - {
-            input: 'гендер'
-            output: ['Есть только два гендера']
-        }
 
     equals:
         - {
@@ -245,6 +241,15 @@ text:
             output: ['<a href="tg://user?id=138098452">АРТЁМ</a>']
         },
         {
+            input: '(?i)((есть\s)?(только\s)?два гендера)',
+            reply_to: false,
+            output: ['цисгендерная мразь!']
+        },
+        {
+            input: '(i?)гендер',
+            output: ['Есть только два гендера']
+        },
+        {
             input: '(?i)^жоск[оа]$',
             output: [
                 'Хигашиката Джоске',
@@ -333,10 +338,5 @@ text:
             input: '(?i)(([рp][оo][сc][сc]|r[oо]ss) ч[иеe]ни)|^ч[иеe]ни$',
             reply_to: false,
             output: ['хуени']
-        },
-        {
-            input: '(?i)((есть\s)?(только\s)?два гендера)',
-            reply_to: true,
-            output: ['цисгендерная мразь!']
         }
     ]
