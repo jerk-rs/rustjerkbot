@@ -15,27 +15,27 @@ type MaybePair = (Option<UserData>, Option<UserData>);
 
 pub(super) enum ShipperingState {
     /// Find a last pair if exists
-    FindPair(Box<Future<Item = Option<Pair>, Error = Error> + Send>),
+    FindPair(Box<dyn Future<Item = Option<Pair>, Error = Error> + Send>),
     /// Load all available user IDs from a store
-    GetUsers(Box<Future<Item = Vec<Integer>, Error = Error> + Send>),
+    GetUsers(Box<dyn Future<Item = Vec<Integer>, Error = Error> + Send>),
     /// Get chat member for active from Telegram
     GetActiveMember {
         active_user_id: Integer,
         passive_user_id: Integer,
-        future: Box<Future<Item = ChatMember, Error = Error> + Send>,
+        future: Box<dyn Future<Item = ChatMember, Error = Error> + Send>,
     },
     /// Get chat member for passive from Telegram
     GetPassiveMember {
         active_user_id: Integer,
         passive_user_id: Integer,
-        future: Box<Future<Item = ChatMember, Error = Error> + Send>,
+        future: Box<dyn Future<Item = ChatMember, Error = Error> + Send>,
     },
     /// Delete non-members from store
-    DelUsers(Box<Future<Item = (), Error = Error> + Send>),
+    DelUsers(Box<dyn Future<Item = (), Error = Error> + Send>),
     /// Load data for each user in pair
-    LoadPair(Box<Future<Item = MaybePair, Error = Error> + Send>),
+    LoadPair(Box<dyn Future<Item = MaybePair, Error = Error> + Send>),
     /// Save pair to store
-    SavePair(Box<Future<Item = Pair, Error = Error> + Send>),
+    SavePair(Box<dyn Future<Item = Pair, Error = Error> + Send>),
 }
 
 impl ShipperingState {

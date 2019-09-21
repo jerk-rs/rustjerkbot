@@ -68,7 +68,7 @@ impl CommandHandler for ShipperingHandler {
 
         HandlerFuture::new(
             ShipperingFuture::new(api.clone(), db_store.clone(), chat_id, pair_timeout).and_then(
-                move |pair| -> Box<Future<Item = HandlerResult, Error = Error> + Send> {
+                move |pair| -> Box<dyn Future<Item = HandlerResult, Error = Error> + Send> {
                     match pair {
                         Some(pair) => {
                             if pair.is_old() {

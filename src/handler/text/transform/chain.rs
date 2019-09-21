@@ -1,11 +1,11 @@
 use super::base::{TransformResult, TransformText};
 
 pub struct Chain {
-    transformers: Vec<Box<TransformText + Send + Sync>>,
+    transformers: Vec<Box<dyn TransformText + Send + Sync>>,
 }
 
 impl Chain {
-    pub fn new(transformers: Vec<Box<TransformText + Send + Sync>>) -> Self {
+    pub fn new(transformers: Vec<Box<dyn TransformText + Send + Sync>>) -> Self {
         Self { transformers }
     }
 }

@@ -82,7 +82,7 @@ impl ChannelStore {
     ) -> Result<Self, Error> {
         Ok(Self {
             url: url.into_url()?,
-            interval: interval,
+            interval,
             kind,
             client,
         })
@@ -137,7 +137,8 @@ impl ChannelStore {
                                                 None
                                             } else {
                                                 let link = &links[0];
-                                                let title = link.title().unwrap_or(entry.title());
+                                                let title =
+                                                    link.title().unwrap_or_else(|| entry.title());
                                                 Some(format!(
                                                     r#"<a href="{}">{}</a>"#,
                                                     link.href(),
