@@ -35,6 +35,10 @@ text:
             input: 'nlinker',
             output: ['t.me/rustjerk/317962']
         }
+        - {
+            input: 'гендер'
+            output: ['Есть только два гендера']
+        }
 
     equals:
         - {
@@ -329,5 +333,10 @@ text:
             input: '(?i)(([рp][оo][сc][сc]|r[oо]ss) ч[иеe]ни)|^ч[иеe]ни$',
             reply_to: false,
             output: ['хуени']
+        },
+        {
+            input: '(?i)((есть\s)?(только\s)?два гендера)',
+            reply_to: true,
+            output: ['цисгендерная мразь!']
         }
     ]
