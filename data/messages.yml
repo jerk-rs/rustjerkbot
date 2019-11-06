@@ -338,5 +338,10 @@ text:
             input: '(?i)(([рp][оo][сc][сc]|r[oо]ss) ч[иеe]ни)|^ч[иеe]ни$',
             reply_to: false,
             output: ['хуени']
+        },
+        {
+            input: 'гоп(ник|арь)?',
+            reply_to: false,
+            output: ['@kremovtort']
         }
     ]
