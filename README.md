@@ -1,6 +1,6 @@
 # RUSTJERKBOT
 
-[![Travis](https://img.shields.io/travis/jerk-rs/rustjerkbot.svg?style=flat-square)](https://travis-ci.org/rossnomann/rustjerkbot)
+[![Travis](https://img.shields.io/travis/rossnomann/rustjerkbot.svg?style=flat-square)](https://travis-ci.org/rossnomann/rustjerkbot)
 
 ## Environment variables
 
