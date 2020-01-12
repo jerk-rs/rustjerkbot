@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn ok() {
         let t = Huify::new();
-        for (input, expected) in vec![
+        for (input, expected) in &[
             (
                 "Значимость этих проблем настолько очевидна",
                 "хуячимость хуетих хуёблем хуястолько хуёчевидна",
@@ -96,19 +96,13 @@ mod tests {
                 "imported and not used\n\nдевиз моей жизни",
                 "imported and not used хуевиз хуёей хуизни",
             ),
-            (
-                "ХУЁВОЕ НАСТРОЕНИЕ",
-                "хуёвое хуястроение",
-            ),
+            ("ХУЁВОЕ НАСТРОЕНИЕ", "хуёвое хуястроение"),
             ("ЁБАНАЯ ХУНТА", "хуёбаная хуюнта"),
-            (
-                "аутизм и деградация",
-                "хуяутизм и хуеградация",
-            ),
+            ("аутизм и деградация", "хуяутизм и хуеградация"),
             ("ху", "хую"),
             ("хуякс", "<b>ALREADY HUIFIED</b>"),
         ] {
-            assert_eq!(t.transform(input).unwrap(), expected);
+            assert_eq!(t.transform(input).unwrap(), *expected);
         }
     }
 }

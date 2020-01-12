@@ -101,10 +101,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(
-            transformed.lines().skip(5).next().unwrap(),
-            "T S U R U R U R U S T",
-        );
+        assert_eq!(transformed.lines().nth(5).unwrap(), "T S U R U R U R U S T",);
     }
 
     #[test]

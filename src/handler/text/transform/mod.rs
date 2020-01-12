@@ -1,9 +1,11 @@
 use self::{
-    arrow::Arrow, base::TransformText, chain::Chain, cw::Cw, huify::Huify, reverse::Reverse,
-    square::Square, star::Star,
+    arrow::Arrow, base::TransformText, chain::Chain, cw::Cw, huify::Huify, reverse::Reverse, square::Square, star::Star,
 };
-use crate::sender::{MessageSender, ReplyTo};
-use carapax::{context::Context, core::types::Message, CommandHandler, HandlerFuture};
+use crate::{
+    context::Context,
+    sender::{ReplyTo, SendError},
+};
+use carapax::{async_trait, Command, Handler};
 
 mod arrow;
 mod base;
@@ -87,15 +89,18 @@ impl TransformCommand<Star> {
     }
 }
 
-impl<T> CommandHandler for TransformCommand<T>
+#[async_trait]
+impl<T> Handler<Context> for TransformCommand<T>
 where
-    T: TransformText,
+    T: TransformText + Send,
 {
-    type Output = HandlerFuture;
+    type Input = Command;
+    type Output = Result<(), SendError>;
 
-    fn handle(&self, context: &mut Context, message: Message, args: Vec<String>) -> Self::Output {
-        let maybe_text = args.join(" ");
+    async fn handle(&mut self, context: &Context, input: Self::Input) -> Self::Output {
+        let maybe_text = input.get_args().join(" ");
         let maybe_text = maybe_text.trim();
+        let message = input.get_message();
         let maybe_text = if maybe_text.is_empty() {
             match message.reply_to {
                 Some(ref reply_to) => reply_to.get_text().map(|x| x.data.clone()),
@@ -118,8 +123,6 @@ where
         } else {
             String::from("You should provide some text")
         };
-        context
-            .get::<MessageSender>()
-            .send(&message, text, ReplyTo::Reply)
+        context.message_sender.send(&message, text, ReplyTo::Reply).await
     }
 }

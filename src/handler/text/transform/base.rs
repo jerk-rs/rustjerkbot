@@ -1,9 +1,20 @@
-use failure::Fail;
+use std::{error::Error, fmt};
 
-#[derive(Fail, Debug)]
+#[derive(Debug)]
 pub enum TransformError {
-    #[fail(display = "Text must contain from {} up to {} characters", min, max)]
     InvalidLength { min: usize, max: usize },
+}
+
+impl Error for TransformError {}
+
+impl fmt::Display for TransformError {
+    fn fmt(&self, out: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TransformError::InvalidLength { min, max } => {
+                write!(out, "Text must contain from {} up to {} characters", min, max)
+            }
+        }
+    }
 }
 
 pub type TransformResult<T> = Result<T, TransformError>;

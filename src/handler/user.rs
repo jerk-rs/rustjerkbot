@@ -1,7 +1,12 @@
-use crate::sender::{MessageSender, ReplyTo};
-use carapax::{context::Context, core::types::Message, HandlerFuture};
+use crate::{
+    context::Context,
+    sender::{ReplyTo, SendError},
+};
+use carapax::{handler, Command};
 
-pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>) -> HandlerFuture {
+#[handler(command = "/user")]
+pub async fn get_user_info(context: &Context, command: Command) -> Result<(), SendError> {
+    let message = command.get_message();
     let user = match message.reply_to {
         Some(ref reply_to) => reply_to.get_user(),
         None => message.get_user(),
@@ -13,7 +18,5 @@ pub fn get_user_info(context: &mut Context, message: Message, _args: Vec<String>
         ),
         None => String::from("No user found in a message"),
     };
-    context
-        .get::<MessageSender>()
-        .send(&message, data, ReplyTo::Incoming)
+    context.message_sender.send(&message, data, ReplyTo::Incoming).await
 }

@@ -1,5 +1,8 @@
-use crate::sender::{MessageSender, ReplyTo};
-use carapax::{context::Context, core::types::Message, HandlerFuture};
+use crate::{
+    context::Context,
+    sender::{ReplyTo, SendError},
+};
+use carapax::{handler, Command};
 
 const FERRIS: &str = r#"
           \
@@ -32,14 +35,16 @@ fn say(input: &str, width: usize) -> String {
     result
 }
 
-pub fn handle_ferris(context: &mut Context, message: Message, args: Vec<String>) -> HandlerFuture {
-    let maybe_text = args.join(" ");
+#[handler(command = "/fsays")]
+pub async fn handle_ferris(context: &Context, command: Command) -> Result<(), SendError> {
+    let maybe_text = command.get_args().join(" ");
     let maybe_text = maybe_text.trim();
     macro_rules! empty_text {
         () => {
             String::from("You should provide some text")
         };
     }
+    let message = command.get_message();
     let input_text = if maybe_text.is_empty() {
         match message.reply_to {
             Some(ref reply_to) => reply_to
@@ -51,9 +56,6 @@ pub fn handle_ferris(context: &mut Context, message: Message, args: Vec<String>)
     } else {
         String::from(maybe_text)
     };
-    context.get::<MessageSender>().send(
-        &message,
-        format!("<pre>{}\n</pre>", say(&input_text, WIDTH)),
-        ReplyTo::Reply,
-    )
+    let data = format!("<pre>{}\n</pre>", say(&input_text, WIDTH));
+    context.message_sender.send(&message, data, ReplyTo::Reply).await
 }

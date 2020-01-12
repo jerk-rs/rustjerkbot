@@ -1,23 +1,49 @@
-use crate::store::db::Store;
 use carapax::{
-    core::{
-        methods::{EditMessageText, SendMessage},
-        types::{Message, ParseMode},
-        Api,
-    },
-    HandlerFuture, HandlerResult,
+    methods::{EditMessageText, SendMessage},
+    types::{Message, ParseMode},
+    Api, ExecuteError,
 };
-use futures::{future::Either, Future};
+use carapax_session::{backend::redis::RedisBackend as RedisSessionBackend, SessionError, SessionManager};
+use std::{error::Error, fmt};
+
+const TRACK_MESSAGE_PREFIX: &str = "message_sender:";
+const TRACK_MESSAGE_TIMEOUT: u64 = 172_800;
 
 #[derive(Clone)]
 pub struct MessageSender {
     api: Api,
-    db_store: Store,
+    session_manager: SessionManager<RedisSessionBackend>,
 }
 
 impl MessageSender {
-    pub fn new(api: Api, db_store: Store) -> Self {
-        Self { api, db_store }
+    pub fn new(api: Api, session_manager: SessionManager<RedisSessionBackend>) -> Self {
+        Self { api, session_manager }
+    }
+
+    async fn send_new(&self, incoming_message: &Message, text: String, reply_to: ReplyTo) -> Result<(), SendError> {
+        let chat_id = incoming_message.get_chat_id();
+        let reply_to_id = match reply_to {
+            ReplyTo::Incoming => incoming_message.id,
+            ReplyTo::Reply => match incoming_message.reply_to {
+                Some(ref reply_to) => reply_to.id,
+                None => incoming_message.id,
+            },
+        };
+        let result_message = self
+            .api
+            .execute(
+                SendMessage::new(chat_id, text)
+                    .reply_to_message_id(reply_to_id)
+                    .parse_mode(ParseMode::Html),
+            )
+            .await?;
+
+        let mut session = self.session_manager.get_session(incoming_message);
+        let key = format!("{}{}", TRACK_MESSAGE_PREFIX, incoming_message.id);
+        session.set(&key, &result_message.id).await?;
+        session.expire(key, TRACK_MESSAGE_TIMEOUT).await?;
+
+        Ok(())
     }
 
     /// Send a new or edit already sent message with given text
@@ -26,58 +52,21 @@ impl MessageSender {
     ///
     /// * incoming_message - Message from update to track to
     /// * text - Text to send
-    pub fn send(
-        &self,
-        incoming_message: &Message,
-        text: String,
-        reply_to: ReplyTo,
-    ) -> HandlerFuture {
-        let db_store = self.db_store.clone();
-        let api = self.api.clone();
+    pub async fn send(&self, incoming_message: &Message, text: String, reply_to: ReplyTo) -> Result<(), SendError> {
         let chat_id = incoming_message.get_chat_id();
-        let incoming_message_id = incoming_message.id;
-        let reply_to_id = match reply_to {
-            ReplyTo::Incoming => incoming_message_id,
-            ReplyTo::Reply => match incoming_message.reply_to {
-                Some(ref reply_to) => reply_to.id,
-                None => incoming_message_id,
-            },
-        };
-
-        macro_rules! send_new {
-            () => {
-                api.execute(
-                    SendMessage::new(chat_id, text)
-                        .reply_to_message_id(reply_to_id)
-                        .parse_mode(ParseMode::Html),
-                )
-                .and_then(move |result_message| {
-                    db_store
-                        .track_message(incoming_message_id, result_message.id)
-                        .map(|()| HandlerResult::Continue)
-                })
-            };
-        }
-
         if incoming_message.is_edited() {
-            HandlerFuture::new(db_store.get_tracked_message(incoming_message_id).and_then(
-                move |tracked_message_id| {
-                    if let Some(tracked_message_id) = tracked_message_id {
-                        Either::A(
-                            api.execute(
-                                EditMessageText::new(chat_id, tracked_message_id, text)
-                                    .parse_mode(ParseMode::Html),
-                            )
-                            .map(|_| HandlerResult::Continue),
-                        )
-                    } else {
-                        Either::B(send_new!())
-                    }
-                },
-            ))
-        } else {
-            HandlerFuture::new(send_new!())
+            let mut session = self.session_manager.get_session(incoming_message);
+            let key = format!("{}{}", TRACK_MESSAGE_PREFIX, incoming_message.id);
+            let tracked_message_id = session.get(key).await?;
+            if let Some(tracked_message_id) = tracked_message_id {
+                self.api
+                    .execute(EditMessageText::new(chat_id, tracked_message_id, text).parse_mode(ParseMode::Html))
+                    .await?;
+                return Ok(());
+            }
         }
+        self.send_new(&incoming_message, text, reply_to).await?;
+        Ok(())
     }
 }
 
@@ -87,4 +76,41 @@ pub enum ReplyTo {
     Incoming,
     /// Reply to `reply_to` message if exists
     Reply,
+}
+
+#[derive(Debug)]
+pub enum SendError {
+    ExecuteMethod(ExecuteError),
+    Session(SessionError),
+}
+
+impl From<ExecuteError> for SendError {
+    fn from(err: ExecuteError) -> Self {
+        SendError::ExecuteMethod(err)
+    }
+}
+
+impl From<SessionError> for SendError {
+    fn from(err: SessionError) -> Self {
+        SendError::Session(err)
+    }
+}
+
+impl Error for SendError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            SendError::ExecuteMethod(err) => Some(err),
+            SendError::Session(err) => Some(err),
+        }
+    }
+}
+
+impl fmt::Display for SendError {
+    fn fmt(&self, out: &mut fmt::Formatter) -> fmt::Result {
+        let reason = match self {
+            SendError::ExecuteMethod(err) => format!("execute method error: {}", err),
+            SendError::Session(err) => format!("session error: {}", err),
+        };
+        write!(out, "can not send message: {}", reason)
+    }
 }
