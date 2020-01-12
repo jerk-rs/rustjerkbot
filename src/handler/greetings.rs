@@ -2,7 +2,7 @@ use crate::context::Context;
 use carapax::{
     handler,
     methods::SendMessage,
-    types::{Message, MessageData},
+    types::{Message, MessageData, ParseMode},
     ExecuteError,
 };
 use std::{error::Error, fmt};
@@ -22,7 +22,11 @@ pub async fn handle_new_chat_member(context: &Context, input: Message) -> Result
         let greeting: String = rows[0].get(0);
         context
             .api
-            .execute(SendMessage::new(context.config.chat_id, greeting).reply_to_message_id(input.id))
+            .execute(
+                SendMessage::new(context.config.chat_id, greeting)
+                    .reply_to_message_id(input.id)
+                    .parse_mode(ParseMode::Html),
+            )
             .await
             .map_err(NewChatMemberError::SendMessage)?;
     }

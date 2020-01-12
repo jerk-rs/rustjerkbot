@@ -1,5 +1,9 @@
 use crate::context::Context;
-use carapax::{methods::SendMessage, types::Integer, Api};
+use carapax::{
+    methods::SendMessage,
+    types::{Integer, ParseMode},
+    Api,
+};
 use chrono::{DateTime, Datelike, Duration as ChronoDuration, FixedOffset, NaiveTime, Utc, Weekday};
 use rand::{seq::SliceRandom, thread_rng};
 use std::{error::Error, fmt, str::FromStr};
@@ -169,7 +173,7 @@ impl Task {
         loop {
             self.interval.tick().await;
             if let Some(message) = self.get_random_message() {
-                let method = SendMessage::new(self.chat_id, message);
+                let method = SendMessage::new(self.chat_id, message).parse_mode(ParseMode::Html);
                 if let Err(err) = self.api.execute(method).await {
                     log::error!("failed to send scheduled message: {}", err)
                 }

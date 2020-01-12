@@ -1,7 +1,7 @@
 use crate::context::Context;
 use carapax::{
     methods::{GetChatMember, SendMessage},
-    types::{ChatMember, Integer, User},
+    types::{ChatMember, Integer, ParseMode, User},
     ExecuteError,
 };
 use liquid::{value::liquid_value, Error as LiquidError};
@@ -90,7 +90,7 @@ impl Shippering {
         for line in rendered.split("\\n") {
             self.context
                 .api
-                .execute(SendMessage::new(self.context.config.chat_id, line))
+                .execute(SendMessage::new(self.context.config.chat_id, line).parse_mode(ParseMode::Html))
                 .await
                 .map_err(ShipperingError::SendMessage)?;
             delay_for(self.context.config.shippering_message_timeout).await
