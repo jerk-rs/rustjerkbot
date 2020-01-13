@@ -7,7 +7,7 @@
 - `RUSTJERKBOT_TOKEN` - Telegram bot token
 - `RUSTJERKBOT_PROXY` - Optional http(s) or socks(4/5) proxy url
                         (see https://docs.rs/tgbot/0.4.0/tgbot/struct.Config.html#method.proxy for more information)
-- `RUSTJERKBOT_REDIS_URL` - Redis URL: redis://localhost for example
+- `RUSTJERKBOT_REDIS_URL` - Redis URL: localhost:6379 for example
 - `RUSTJERKBOT_POSTGRES_URL` - PostgreSQL URL: postgresql://user:pass@host/database
 - `RUSTJERKBOT_CHAT_ID` - Chat ID to work with.
 - `RUSTJERKBOT_SHIPPERING_PAIR_TIMEOUT` - Timeout between pairs in seconds.
