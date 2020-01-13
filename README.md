@@ -1,6 +1,6 @@
 # RUSTJERKBOT
 
-[![Travis](https://img.shields.io/travis/rossnomann/rustjerkbot.svg?style=flat-square)](https://travis-ci.org/rossnomann/rustjerkbot)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/rossnomann/rustjerkbot/CI?style=flat-square)](https://github.com/rossnomann/rustjerkbot/actions/)
 
 ## Environment variables
 
