@@ -5,12 +5,11 @@ authors = ["Ross Nomann <rossnomann@protonmail.com>"]
 edition = "2018"
 
 [dependencies]
-ammonia = "3.0.0"
 atom_syndication = "0.7.0"
 bytes = "0.5.3"
-carapax = "0.3.1"
-carapax-access = "0.2.0"
-carapax-session = { version = "0.2.0", features = ["redis-backend"] }
+carapax = "0.4.0"
+carapax-access = "0.2.1"
+carapax-session = { version = "0.2.1", features = ["redis-backend"] }
 chrono = { version = "0.4.10", features = ["serde"] }
 darkredis = "0.5.2"
 dotenv = "0.15.0"

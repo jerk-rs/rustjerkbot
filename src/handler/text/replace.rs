@@ -2,7 +2,10 @@ use crate::{
     context::Context,
     sender::{ReplyTo, SendError},
 };
-use carapax::{handler, types::Message};
+use carapax::{
+    handler,
+    types::{Message, ParseMode},
+};
 use sedregex::find_and_replace;
 
 #[handler]
@@ -33,7 +36,7 @@ pub async fn replace_text_handler(context: &Context, message: Message) -> Result
                 } else if reply_text.len() > 4096 {
                     String::from("Result text can not exceed 4096 characters")
                 } else {
-                    ammonia::clean(&reply_text)
+                    ParseMode::Html.escape(&reply_text)
                 },
                 ReplyTo::Reply,
             )

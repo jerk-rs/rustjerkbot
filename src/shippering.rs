@@ -1,13 +1,15 @@
 use crate::context::Context;
 use carapax::{
     methods::{GetChatMember, SendMessage},
-    types::{ChatMember, Integer, ParseMode, User},
+    types::{ChatMember, Integer, MentionError, ParseMode},
     ExecuteError,
 };
 use liquid::{value::liquid_value, Error as LiquidError};
 use std::{error::Error, fmt};
 use tokio::time::delay_for;
 use tokio_postgres::Error as PostgresError;
+
+const MAX_GET_CHAT_MEMBER_RETRIES: usize = 10;
 
 pub struct Shippering {
     context: Context,
@@ -19,12 +21,26 @@ impl Shippering {
     }
 
     async fn get_chat_member(&self, user_id: Integer) -> Result<ChatMember, ShipperingError> {
-        Ok(self
-            .context
-            .api
-            .execute(GetChatMember::new(self.context.config.chat_id, user_id))
-            .await
-            .map_err(ShipperingError::GetChatMember)?)
+        let mut current_retry = 0;
+        loop {
+            match self
+                .context
+                .api
+                .execute(GetChatMember::new(self.context.config.chat_id, user_id))
+                .await
+            {
+                Ok(member) => return Ok(member),
+                Err(err) => {
+                    if let ExecuteError::Response(ref err) = err {
+                        if err.can_retry() && current_retry < MAX_GET_CHAT_MEMBER_RETRIES {
+                            current_retry += 1;
+                            continue;
+                        }
+                    }
+                    return Err(ShipperingError::GetChatMember(err));
+                }
+            }
+        }
     }
 
     async fn delete_user(&self, user_id: Integer) -> Result<(), ShipperingError> {
@@ -76,10 +92,11 @@ impl Shippering {
         if rows.is_empty() {
             return Ok(());
         }
+        let parse_mode = ParseMode::Html;
         let template: String = rows[0].get(0);
         let template = self.context.tpl_parser.parse(&template)?;
-        let first = mention(pair.first.get_user());
-        let last = mention(pair.last.get_user());
+        let first = pair.first.get_user().get_mention(parse_mode)?;
+        let last = pair.last.get_user().get_mention(parse_mode)?;
         let vars = liquid_value!({
             "first": first,
             "last": last
@@ -90,7 +107,7 @@ impl Shippering {
         for line in rendered.split("\\n") {
             self.context
                 .api
-                .execute(SendMessage::new(self.context.config.chat_id, line).parse_mode(ParseMode::Html))
+                .execute(SendMessage::new(self.context.config.chat_id, line).parse_mode(parse_mode))
                 .await
                 .map_err(ShipperingError::SendMessage)?;
             delay_for(self.context.config.shippering_message_timeout).await
@@ -98,10 +115,16 @@ impl Shippering {
         Ok(())
     }
 
-    pub async fn run(self) -> Result<(), ShipperingError> {
+    pub async fn run(self) {
         loop {
-            if let Some(pair) = self.find_pair().await? {
-                self.send_message(&pair).await?;
+            match self.find_pair().await {
+                Ok(Some(pair)) => {
+                    if let Err(err) = self.send_message(&pair).await {
+                        log::error!("can not send message for shippering: {}", err);
+                    };
+                }
+                Ok(None) => { /*noop*/ }
+                Err(err) => log::error!("can not get pair for shippering: {}", err),
             }
             delay_for(self.context.config.shippering_pair_timeout).await;
         }
@@ -113,19 +136,6 @@ struct Pair {
     last: ChatMember,
 }
 
-fn mention(user: &User) -> String {
-    if let Some(ref username) = user.username {
-        format!("@{}", username)
-    } else {
-        let mut full_name = user.first_name.clone();
-        if let Some(ref last_name) = user.last_name {
-            full_name += last_name;
-        }
-        full_name = ammonia::clean(&full_name);
-        format!(r#"<a href="tg://user?id={}">{}</a>"#, user.id, full_name)
-    }
-}
-
 #[derive(Debug)]
 pub enum ShipperingError {
     GetChatMember(ExecuteError),
@@ -133,12 +143,19 @@ pub enum ShipperingError {
     DeleteUser(PostgresError),
     GetPhrase(PostgresError),
     Liquid(LiquidError),
+    Mention(MentionError),
     SendMessage(ExecuteError),
 }
 
 impl From<LiquidError> for ShipperingError {
     fn from(err: LiquidError) -> Self {
         ShipperingError::Liquid(err)
+    }
+}
+
+impl From<MentionError> for ShipperingError {
+    fn from(err: MentionError) -> Self {
+        ShipperingError::Mention(err)
     }
 }
 
@@ -150,6 +167,7 @@ impl Error for ShipperingError {
             ShipperingError::DeleteUser(err) => Some(err),
             ShipperingError::GetPhrase(err) => Some(err),
             ShipperingError::Liquid(err) => Some(err),
+            ShipperingError::Mention(err) => Some(err),
             ShipperingError::SendMessage(err) => Some(err),
         }
     }
@@ -163,6 +181,7 @@ impl fmt::Display for ShipperingError {
             ShipperingError::DeleteUser(err) => write!(out, "failed to delete user: {}", err),
             ShipperingError::GetPhrase(err) => write!(out, "failed to get shippering phrase: {}", err),
             ShipperingError::Liquid(err) => write!(out, "template error: {}", err),
+            ShipperingError::Mention(err) => write!(out, "can not get mention for a user: {}", err),
             ShipperingError::SendMessage(err) => write!(out, "failed to send message: {}", err),
         }
     }

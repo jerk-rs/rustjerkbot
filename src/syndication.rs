@@ -63,7 +63,7 @@ impl Syndication {
                     let item = &items[0];
                     match (item.title(), item.link()) {
                         (Some(title), Some(link)) => {
-                            Some(format!(r#"<a href="{}">{}</a>"#, link, ammonia::clean(title),))
+                            Some(format!(r#"<a href="{}">{}</a>"#, link, ParseMode::Html.escape(title),))
                         }
                         _ => None,
                     }
@@ -82,7 +82,11 @@ impl Syndication {
                     } else {
                         let link = &links[0];
                         let title = link.title().unwrap_or_else(|| entry.title());
-                        Some(format!(r#"<a href="{}">{}</a>"#, link.href(), ammonia::clean(title),))
+                        Some(format!(
+                            r#"<a href="{}">{}</a>"#,
+                            link.href(),
+                            ParseMode::Html.escape(title),
+                        ))
                     }
                 }
             }

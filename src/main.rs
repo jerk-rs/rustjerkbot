@@ -84,11 +84,7 @@ async fn main() {
     scheduler.spawn().await.expect("Failed to spawn messages scheduler");
 
     let shippering = Shippering::new(context.clone());
-    tokio::spawn(async move {
-        if let Err(err) = shippering.run().await {
-            log::error!("shippering error: {}", err);
-        }
-    });
+    tokio::spawn(shippering.run());
 
     let syndication = Syndication::new(context.clone());
     tokio::spawn(async move {
