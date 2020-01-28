@@ -117,16 +117,23 @@ impl Shippering {
 
     pub async fn run(self) {
         loop {
-            match self.find_pair().await {
+            if match self.find_pair().await {
                 Ok(Some(pair)) => {
                     if let Err(err) = self.send_message(&pair).await {
                         log::error!("can not send message for shippering: {}", err);
-                    };
+                        false
+                    } else {
+                        true
+                    }
                 }
-                Ok(None) => { /*noop*/ }
-                Err(err) => log::error!("can not get pair for shippering: {}", err),
+                Ok(None) => true,
+                Err(err) => {
+                    log::error!("can not get pair for shippering: {}", err);
+                    false
+                }
+            } {
+                delay_for(self.context.config.shippering_pair_timeout).await;
             }
-            delay_for(self.context.config.shippering_pair_timeout).await;
         }
     }
 }
