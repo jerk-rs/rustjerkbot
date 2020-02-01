@@ -19,7 +19,8 @@ pub async fn handle_new_chat_member(context: &Context, input: Message) -> Result
         if rows.is_empty() {
             return Ok(());
         }
-        let greeting: String = rows[0].get(0);
+        let mut greeting: String = rows[0].get(0);
+        greeting = greeting.replace("\\n", "\n");
         context
             .api
             .execute(
