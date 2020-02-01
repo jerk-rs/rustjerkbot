@@ -31,7 +31,8 @@ impl AutoresponseHandler {
             let input: String = row.get(0);
             let rule_type: String = row.get(1);
             let reply_to: bool = row.get(2);
-            let output: Vec<String> = row.get(3);
+            let mut output: Vec<String> = row.get(3);
+            output = output.into_iter().map(|x| x.replace("\\n", "\n")).collect();
             let messages = Messages { reply_to, output };
             match rule_type.as_str() {
                 "contains" => {
