@@ -6,12 +6,10 @@ edition = "2018"
 
 [dependencies]
 atom_syndication = "0.7.0"
-bytes = "0.5.3"
-carapax = "0.4.0"
-carapax-access = "0.2.1"
-carapax-session = { version = "0.2.1", features = ["redis-backend"] }
+bytes = "0.5.4"
+carapax = { version = "0.5.0", features = ["access", "session-redis"] }
 chrono = { version = "0.4.10", features = ["serde"] }
-darkredis = "0.5.2"
+darkredis = "0.6.1"
 dotenv = "0.15.0"
 env_logger = "0.7.1"
 envy = "0.4.1"
