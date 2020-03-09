@@ -1,9 +1,9 @@
 use carapax::{
     methods::{EditMessageText, SendMessage},
+    session::{backend::redis::RedisBackend as RedisSessionBackend, SessionError, SessionIdError, SessionManager},
     types::{Message, ParseMode},
     Api, ExecuteError,
 };
-use carapax_session::{backend::redis::RedisBackend as RedisSessionBackend, SessionError, SessionManager};
 use std::{error::Error, fmt};
 
 const TRACK_MESSAGE_PREFIX: &str = "message_sender:";
@@ -38,7 +38,7 @@ impl MessageSender {
             )
             .await?;
 
-        let mut session = self.session_manager.get_session(incoming_message);
+        let mut session = self.session_manager.get_session(incoming_message)?;
         let key = format!("{}{}", TRACK_MESSAGE_PREFIX, incoming_message.id);
         session.set(&key, &result_message.id).await?;
         session.expire(key, TRACK_MESSAGE_TIMEOUT).await?;
@@ -55,7 +55,7 @@ impl MessageSender {
     pub async fn send(&self, incoming_message: &Message, text: String, reply_to: ReplyTo) -> Result<(), SendError> {
         let chat_id = incoming_message.get_chat_id();
         if incoming_message.is_edited() {
-            let mut session = self.session_manager.get_session(incoming_message);
+            let mut session = self.session_manager.get_session(incoming_message)?;
             let key = format!("{}{}", TRACK_MESSAGE_PREFIX, incoming_message.id);
             let tracked_message_id = session.get(key).await?;
             if let Some(tracked_message_id) = tracked_message_id {
@@ -82,6 +82,7 @@ pub enum ReplyTo {
 pub enum SendError {
     ExecuteMethod(ExecuteError),
     Session(SessionError),
+    SessionId(SessionIdError),
 }
 
 impl From<ExecuteError> for SendError {
@@ -96,11 +97,18 @@ impl From<SessionError> for SendError {
     }
 }
 
+impl From<SessionIdError> for SendError {
+    fn from(err: SessionIdError) -> Self {
+        SendError::SessionId(err)
+    }
+}
+
 impl Error for SendError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             SendError::ExecuteMethod(err) => Some(err),
             SendError::Session(err) => Some(err),
+            SendError::SessionId(err) => Some(err),
         }
     }
 }
@@ -110,6 +118,7 @@ impl fmt::Display for SendError {
         let reason = match self {
             SendError::ExecuteMethod(err) => format!("execute method error: {}", err),
             SendError::Session(err) => format!("session error: {}", err),
+            SendError::SessionId(err) => format!("{}", err),
         };
         write!(out, "can not send message: {}", reason)
     }

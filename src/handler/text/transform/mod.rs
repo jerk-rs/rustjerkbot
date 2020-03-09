@@ -5,7 +5,7 @@ use crate::{
     context::Context,
     sender::{ReplyTo, SendError},
 };
-use carapax::{async_trait, Command, Handler};
+use carapax::{async_trait, types::Command, Handler};
 
 mod arrow;
 mod base;
@@ -17,6 +17,7 @@ mod square;
 mod star;
 
 pub struct TransformCommand<T> {
+    name: String,
     transformer: T,
     monospace_reply: bool,
 }
@@ -24,6 +25,7 @@ pub struct TransformCommand<T> {
 impl TransformCommand<Arrow> {
     pub fn arrow() -> Self {
         Self {
+            name: String::from("/arrow"),
             transformer: Arrow::new(),
             monospace_reply: true,
         }
@@ -33,6 +35,7 @@ impl TransformCommand<Arrow> {
 impl TransformCommand<Cw> {
     pub fn cw() -> Self {
         Self {
+            name: String::from("/cw"),
             transformer: Cw::new(),
             monospace_reply: true,
         }
@@ -42,6 +45,7 @@ impl TransformCommand<Cw> {
 impl TransformCommand<Huify> {
     pub fn huify() -> Self {
         Self {
+            name: String::from("/huify"),
             transformer: Huify::new(),
             monospace_reply: false,
         }
@@ -51,6 +55,7 @@ impl TransformCommand<Huify> {
 impl TransformCommand<Chain> {
     pub fn jerkify() -> Self {
         Self {
+            name: String::from("/jerkify"),
             transformer: Chain::new(vec![
                 Box::new(Huify::new()),
                 Box::new(Reverse),
@@ -65,6 +70,7 @@ impl TransformCommand<Chain> {
 impl TransformCommand<Reverse> {
     pub fn reverse() -> Self {
         Self {
+            name: String::from("/reverse"),
             transformer: Reverse,
             monospace_reply: false,
         }
@@ -74,6 +80,7 @@ impl TransformCommand<Reverse> {
 impl TransformCommand<Square> {
     pub fn square() -> Self {
         Self {
+            name: String::from("/square"),
             transformer: Square::new(),
             monospace_reply: true,
         }
@@ -83,6 +90,7 @@ impl TransformCommand<Square> {
 impl TransformCommand<Star> {
     pub fn star() -> Self {
         Self {
+            name: String::from("/star"),
             transformer: Star::new(),
             monospace_reply: true,
         }
@@ -98,6 +106,9 @@ where
     type Output = Result<(), SendError>;
 
     async fn handle(&mut self, context: &Context, input: Self::Input) -> Self::Output {
+        if input.get_name() != self.name {
+            return Ok(());
+        }
         let maybe_text = input.get_args().join(" ");
         let maybe_text = maybe_text.trim();
         let message = input.get_message();

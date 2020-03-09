@@ -2,7 +2,7 @@ use crate::{
     context::Context,
     sender::{ReplyTo, SendError},
 };
-use carapax::{handler, Command};
+use carapax::{handler, types::Command};
 
 const FERRIS: &str = r#"
           \

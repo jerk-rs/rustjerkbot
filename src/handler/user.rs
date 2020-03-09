@@ -2,7 +2,7 @@ use crate::{
     context::Context,
     sender::{ReplyTo, SendError},
 };
-use carapax::{handler, Command};
+use carapax::{handler, types::Command};
 
 #[handler(command = "/user")]
 pub async fn get_user_info(context: &Context, command: Command) -> Result<(), SendError> {

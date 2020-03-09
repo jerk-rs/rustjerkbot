@@ -1,6 +1,9 @@
-use carapax::{longpoll::LongPoll, webhook, Api, CommandDispatcher, Dispatcher};
-use carapax_access::{AccessHandler, AccessRule, InMemoryAccessPolicy};
-use carapax_session::{backend::redis::RedisBackend as RedisSessionBackend, SessionCollector, SessionManager};
+use carapax::{
+    access::{AccessHandler, AccessRule, InMemoryAccessPolicy},
+    longpoll::LongPoll,
+    session::{backend::redis::RedisBackend as RedisSessionBackend, SessionCollector, SessionManager},
+    webhook, Api, Dispatcher,
+};
 use darkredis::ConnectionPool as RedisPool;
 use dotenv::dotenv;
 use env_logger;
@@ -93,16 +96,6 @@ async fn main() {
         }
     });
 
-    let mut command_dispatcher = CommandDispatcher::new();
-    command_dispatcher.add_handler("/arrow", TransformCommand::arrow());
-    command_dispatcher.add_handler("/cw", TransformCommand::cw());
-    command_dispatcher.add_handler("/jerkify", TransformCommand::jerkify());
-    command_dispatcher.add_handler("/huify", TransformCommand::huify());
-    command_dispatcher.add_handler("/reverse", TransformCommand::reverse());
-    command_dispatcher.add_handler("/square", TransformCommand::square());
-    command_dispatcher.add_handler("/star", TransformCommand::star());
-    command_dispatcher.add_handler("/user", get_user_info);
-
     let mut dispatcher = Dispatcher::new(context);
     dispatcher.add_handler(AccessHandler::new(
         InMemoryAccessPolicy::default().push_rule(AccessRule::allow_chat(config.chat_id)),
@@ -115,7 +108,14 @@ async fn main() {
             .expect("Failed to create autoresponse handler"),
     );
     dispatcher.add_handler(replace_text_handler);
-    dispatcher.add_handler(command_dispatcher);
+    dispatcher.add_handler(TransformCommand::arrow());
+    dispatcher.add_handler(TransformCommand::cw());
+    dispatcher.add_handler(TransformCommand::jerkify());
+    dispatcher.add_handler(TransformCommand::huify());
+    dispatcher.add_handler(TransformCommand::reverse());
+    dispatcher.add_handler(TransformCommand::square());
+    dispatcher.add_handler(TransformCommand::star());
+    dispatcher.add_handler(get_user_info);
     dispatcher.add_handler(handle_ferris);
 
     match config.webhook_url {
