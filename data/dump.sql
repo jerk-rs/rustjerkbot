@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 10.10 (Ubuntu 10.10-0ubuntu0.18.04.1)
--- Dumped by pg_dump version 10.10 (Ubuntu 10.10-0ubuntu0.18.04.1)
+-- Dumped from database version 10.12 (Ubuntu 10.12-0ubuntu0.18.04.1)
+-- Dumped by pg_dump version 10.12 (Ubuntu 10.12-0ubuntu0.18.04.1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -278,9 +278,9 @@ COPY public.autoresponse_phrases (id, input, rule_type, reply_to, output) FROM s
 --
 
 COPY public.feeds (id, url, kind, timeout, last_update, last_entry) FROM stdin;
-3	https://blog.golang.org/feed.atom	atom	3600	2020-02-01 18:57:51.407823	<a href="https://blog.golang.org/pkg.go.dev-2020">Next steps for pkg.go.dev</a>
-1	https://this-week-in-rust.org/rss.xml	rss	3600	2020-02-01 18:57:51.449317	<a href="https://this-week-in-rust.org/blog/2020/01/28/this-week-in-rust-323/">This Week in Rust 323</a>
-2	https://blog.rust-lang.org/feed.xml	atom	3600	2020-02-01 18:57:51.473854	<a href="https://blog.rust-lang.org/2020/01/31/conf-lineup.html">The 2020 Rust Event Lineup</a>
+3	https://blog.golang.org/feed.atom	atom	3600	2020-03-09 07:04:01.046652	<a href="https://blog.golang.org/a-new-go-api-for-protocol-buffers">A new Go API for Protocol Buffers</a>
+1	https://this-week-in-rust.org/rss.xml	rss	3600	2020-03-09 07:04:01.160972	<a href="https://this-week-in-rust.org/blog/2020/03/03/this-week-in-rust-328/">This Week in Rust 328</a>
+2	https://blog.rust-lang.org/feed.xml	atom	3600	2020-03-09 07:04:01.25744	<a href="https://blog.rust-lang.org/2020/02/27/Rust-1.41.1.html">Announcing Rust 1.41.1</a>
 \.
 
 
@@ -309,12 +309,12 @@ COPY public.greetings (id, text) FROM stdin;
 --
 
 COPY public.schedule (id, day, "time", messages) FROM stdin;
-1	*	10:00:00	{"Всем крайне продуктивного дня.","Жерк, доброе утро и всем продуктивной гребли.","Доброе утро, уважаемые разработчики!","Всем продуктивного деградирования и развития, в зависимости от текущих задач))","Уважаемые граждане бандиты, желаю всем сегодня разъебать этот день.","Всем качественного дня/предстоящей ночи)"}
 2	*	20:00:00	{"Победители, как день прошёл, какие горы покорили сегодня?","Ку всем и хорошего вечера, славные войны Гуррен-Данна)","Доброй ночи и прогресса, охуительных идей и просветления."}
 3	mon	07:00:00	{"Разъебите эту неделю, Джерковчане","Всем отличной недели, достижения поставленных задач, продуктивной гребли и новых открытий."}
 4	thu	12:00:00	{"Как день, пот со лба?"}
 5	fri	18:00:00	{"Уважаемые, всем охуенно провести субботу, воскресенье, жизнь. Успехов, роста и производительности."}
 6	sun	21:00:00	{"Необщительные вы, ну спать наверное хотите."}
+1	*	10:00:00	{"Всем крайне продуктивного дня.","Жерк, доброе утро и всем продуктивной гребли.","Доброе утро, уважаемые разработчики!","Всем продуктивного деградирования и развития, в зависимости от текущих задач))","Уважаемые граждане бандиты, желаю всем сегодня разъебать этот день.","Всем качественного дня/предстоящей ночи)","Здравствуйте дорогое сообщество","Приветствие всем разработчикам на rust)"}
 \.
 
 
@@ -341,35 +341,42 @@ COPY public.shippering_phrases (id, template) FROM stdin;
 --
 
 COPY public.users (id, first_name, last_name, username) FROM stdin;
-186561677	Alena	Yuryeva	NIMFETRISA
-265303151	Fortunato	\N	fort28
-159469089	Nikita	Vilunov	vnikita
-115874617	клюквенный	сбитень	\N
-359010513	весёлый кремовый 🍰 торт	\N	kremovtort
-26993993	Anton	Rey	Toshiki
-37096931	Evgεny	🤙	fominok
-471878788	Tux	\N	tuxubuntu
-50323043	Seer Iλya	[Vennik E10]	ilyavenner
-187843269	Emmanuel	Goldstein	emmanuelGoldstein
-292325285	Mikail	Bagishov	MikailBag
-408258968	Hirrolot :: IO ()	\N	hirrolot
-7929120	Cat	 🐈	kEzViSiOn
-597852601	Re-L	\N	re4lmayer
-360194217	Urry 🌚	Krivorot	jouretz
-380095660	Aikidos	\N	aikidos
-129719794	totallynot@tty	\N	bugworm
-72892827	Слава	\N	t91x0
-138098452	Artjom	\N	thelastwordisrejoice
-195126013	Panda🤔	\N	PandaThePanda
-441826110	Антон	\N	insert_reference_here
-107820725	Kerrigan	\N	sarakerrigan
-101880067	Nikolai	Volkov	HeadcrabInMyRoom
-7383917	Denis	\N	mexus
-134759264	Piu	Piu	iampiupiu
-197333640	Andrew	Demonov	fcoder
-523792555	cyberbrodyaga 🛰	\N	test3rr
-1010004414	Arsenii	Lyashenko	\N
 448757	nndii	(ya ne Andrey)	nndii
+107820725	Kerrigan	\N	sarakerrigan
+134759264	Piu	Piu	iampiupiu
+26993993	Anton	Rey	Toshiki
+115874617	восадули	вогороде	\N
+441826110	Антон	\N	insert_reference_here
+359010513	весёлый кремовый 🍰 торт	\N	kremovtort
+129719794	totallynot@tty	\N	bugworm
+289101835	Vladimir	\N	c_vld
+360194217	Urry 🌚	Krivorot	jouretz
+27122980	Alex	\N	sawaxon
+471878788	Tux	\N	tuxubuntu
+265303151	Fortunato	\N	fort28
+186561677	Alena	Yuryeva	NIMFETRISA
+159469089	Nikita	Vilunov	vnikita
+187843269	Emmanuel	Goldstein	emmanuelGoldstein
+195126013	Panda🤔	\N	PandaThePanda
+481434898	Not a Centril	\N	centril
+408258968	Hirrolot	\N	hirrolot
+108157884	Mike	Lubinets	mersinvald
+197333640	Andrew	Demonov	fcoder
+3851700	Vlad	0xd728c4a7cd55d8db	razum2um
+425276912	Arc<Mutex<S>>	\N	SergeRxx
+523792555	cyberbrodyaga 🛰	\N	test3rr
+7929120	Cat	\N	kEzViSiOn
+138098452	Artjom	\N	thelastwordisrejoice
+268486177	p0lunin	\N	p0lunin
+7383917	Denis	\N	mexus
+380095660	Aikidos	\N	aikidos
+597852601	Re-L	\N	re4lmayer
+730006604	Григорий	Базукин	\N
+292325285	Mikail	Bagishov	MikailBag
+101880067	Nikolai	Volkov	HeadcrabInMyRoom
+1010004414	Arsenii	Lyashenko	\N
+37096931	Evgεny	🤙	fominok
+50323043	Seer Iλya	[Vennik E10]	ilyavenner
 \.
 
 
@@ -459,3 +466,4 @@ ALTER TABLE ONLY public.users
 --
 -- PostgreSQL database dump complete
 --
+
