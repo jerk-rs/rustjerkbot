@@ -7,7 +7,6 @@ use carapax::{
 use darkredis::ConnectionPool as RedisPool;
 use dotenv::dotenv;
 use env_logger;
-use liquid::ParserBuilder as TemplateParserBuilder;
 use reqwest::Client as HttpClient;
 use std::sync::Arc;
 use tokio_postgres::{connect as pg_connect, NoTls as PgNoTls};
@@ -19,7 +18,6 @@ mod context;
 mod handler;
 mod scheduler;
 mod sender;
-mod shippering;
 mod syndication;
 
 use self::{
@@ -35,7 +33,6 @@ use self::{
     },
     scheduler::Scheduler,
     sender::MessageSender,
-    shippering::Shippering,
     syndication::Syndication,
 };
 
@@ -78,16 +75,10 @@ async fn main() {
         http_client: HttpClient::new(),
         message_sender: MessageSender::new(api.clone(), SessionManager::new(session_backend)),
         pg_client: pg_client.clone(),
-        tpl_parser: TemplateParserBuilder::with_liquid()
-            .build()
-            .expect("Can not create template parser"),
     };
 
     let scheduler = Scheduler::new(context.clone());
     scheduler.spawn().await.expect("Failed to spawn messages scheduler");
-
-    let shippering = Shippering::new(context.clone());
-    tokio::spawn(shippering.run());
 
     let syndication = Syndication::new(context.clone());
     tokio::spawn(async move {

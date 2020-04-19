@@ -154,35 +154,6 @@ CREATE SEQUENCE public.schedule_id_seq
 
 ALTER SEQUENCE public.schedule_id_seq OWNED BY public.schedule.id;
 
-
---
--- Name: shippering_phrases; Type: TABLE; Schema: public; Owner: ross
---
-
-CREATE TABLE public.shippering_phrases (
-    id integer NOT NULL,
-    template text
-);
-
---
--- Name: shippering_phrases_id_seq; Type: SEQUENCE; Schema: public; Owner: ross
---
-
-CREATE SEQUENCE public.shippering_phrases_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
---
--- Name: shippering_phrases_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ross
---
-
-ALTER SEQUENCE public.shippering_phrases_id_seq OWNED BY public.shippering_phrases.id;
-
-
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: ross
 --
@@ -220,14 +191,6 @@ ALTER TABLE ONLY public.greetings ALTER COLUMN id SET DEFAULT nextval('public.gr
 --
 
 ALTER TABLE ONLY public.schedule ALTER COLUMN id SET DEFAULT nextval('public.schedule_id_seq'::regclass);
-
-
---
--- Name: shippering_phrases id; Type: DEFAULT; Schema: public; Owner: ross
---
-
-ALTER TABLE ONLY public.shippering_phrases ALTER COLUMN id SET DEFAULT nextval('public.shippering_phrases_id_seq'::regclass);
-
 
 --
 -- Data for Name: autoresponse_phrases; Type: TABLE DATA; Schema: public; Owner: ross
@@ -317,25 +280,6 @@ COPY public.schedule (id, day, "time", messages) FROM stdin;
 1	*	10:00:00	{"Всем крайне продуктивного дня.","Жерк, доброе утро и всем продуктивной гребли.","Доброе утро, уважаемые разработчики!","Всем продуктивного деградирования и развития, в зависимости от текущих задач))","Уважаемые граждане бандиты, желаю всем сегодня разъебать этот день.","Всем качественного дня/предстоящей ночи)","Здравствуйте дорогое сообщество","Приветствие всем разработчикам на rust)"}
 \.
 
-
---
--- Data for Name: shippering_phrases; Type: TABLE DATA; Schema: public; Owner: ross
---
-
-COPY public.shippering_phrases (id, template) FROM stdin;
-1	Как песок в купальнике, как вино на свадебном платье\\nКак слушать симфонию с выключенным звуком\\nКак гитарист, сломавший руку\\nТакая любовь этих ребят {{first}} + {{last}} = ♥️
-2	В горе и в радости\\nВ богатстве и в бедности\\nВ болезни и в здравии\\nКлянутся любить друг друга {{first}} + {{last}} = ♥️
-3	Море волнуется раз...\\nМоре волнуется два...\\nМоре волнуется три...\\nИ в любовной позе замирают {{first}} + {{last}} = ♥️
-4	Все пройдет и печаль и радость\\nВсе пройдет, так устроен свет\\nВсе пройдет, только верить надо\\nНо между ними любовь не пройдёт {{first}} + {{last}} = ♥️
-5	По километрам витой пары\\nЧерез запутанные схемы свичей\\nСквозь блокировки РКН\\nИх связала любовь {{first}} + {{last}} = ♥️
-6	Я вас люблю, хоть и бешусь,\\nХоть это труд и стыд напрасный,\\nИ в этой глупости несчастной\\nУ ваших ног я признаюсь!\\n{{first}} + {{last}} = ♥️
-7	Желаю новобрачным, чтобы каждый новый день приносил чудесные мгновения радости.\\nНаслаждайтесь жизнью и получайте удовольствие от каждой минуты, проведенной вместе.\\nПусть впечатления от вашей новой совместной жизни будут яркими и красочными.\\nСовершайте вместе маленькие открытия и не уставайте удивлять другу друга.\\nПусть каждая ваша улыбка согревает взаимные чувства\\nПоддерживает огонь желания быть вместе и позволяет сохранить теплоту семейных отношений.\\nЖелаю согласия, любви и счастья вашей семье!\\n{{first}} + {{last}} = ♥️
-8	Like Bonny & Clyde..\\nLike Romeo & Julietta..\\nLike Hitler & Eva Braun..\\nThis is also a lovely couple: {{first}} + {{last}} = ♥️
-9	Violets are blue,\\nSugar is sweet,\\nand so this lovely couple: {{first}} + {{last}} = ♥️
-10	Like Kim Jong Un with nuclear missles..\\nLike Donald Trump & his haircut..\\nLike Snoop Dog & weed..\\nThis is also a lovely couple: {{first}} + {{last}} = ♥️
-\.
-
-
 --
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: ross
 --
@@ -407,14 +351,6 @@ SELECT pg_catalog.setval('public.greetings_id_seq', 12, true);
 
 SELECT pg_catalog.setval('public.schedule_id_seq', 6, true);
 
-
---
--- Name: shippering_phrases_id_seq; Type: SEQUENCE SET; Schema: public; Owner: ross
---
-
-SELECT pg_catalog.setval('public.shippering_phrases_id_seq', 1, false);
-
-
 --
 -- Name: autoresponse_phrases autoresponse_phrases_pkey; Type: CONSTRAINT; Schema: public; Owner: ross
 --
@@ -445,15 +381,6 @@ ALTER TABLE ONLY public.greetings
 
 ALTER TABLE ONLY public.schedule
     ADD CONSTRAINT schedule_pkey PRIMARY KEY (id);
-
-
---
--- Name: shippering_phrases shippering_phrases_pkey; Type: CONSTRAINT; Schema: public; Owner: ross
---
-
-ALTER TABLE ONLY public.shippering_phrases
-    ADD CONSTRAINT shippering_phrases_pkey PRIMARY KEY (id);
-
 
 --
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: ross

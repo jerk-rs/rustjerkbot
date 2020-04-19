@@ -20,8 +20,6 @@ struct RawConfig {
     chat_id: Integer,
     session_gc_period: u64,
     session_gc_timeout: u64,
-    shippering_pair_timeout: u64,
-    shippering_message_timeout: u64,
 }
 
 fn default_webhook_path() -> String {
@@ -38,8 +36,6 @@ pub struct Config {
     pub chat_id: Integer,
     pub session_gc_period: Duration,
     pub session_gc_timeout: Duration,
-    pub shippering_pair_timeout: Duration,
-    pub shippering_message_timeout: Duration,
 }
 
 impl Config {
@@ -61,8 +57,6 @@ impl Config {
             chat_id: raw.chat_id,
             session_gc_period: Duration::from_secs(raw.session_gc_period),
             session_gc_timeout: Duration::from_secs(raw.session_gc_timeout),
-            shippering_pair_timeout: Duration::from_secs(raw.shippering_pair_timeout),
-            shippering_message_timeout: Duration::from_secs(raw.shippering_message_timeout),
         })
     }
 
