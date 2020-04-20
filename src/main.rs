@@ -8,9 +8,12 @@ use darkredis::ConnectionPool as RedisPool;
 use dotenv::dotenv;
 use env_logger;
 use reqwest::Client as HttpClient;
-use std::{env, sync::Arc};
+use std::{env, sync::Arc, time::Duration};
 use tokio_postgres::{connect as pg_connect, NoTls as PgNoTls};
+
 const SESSION_NAMESPACE: &str = "rustjerkbot:";
+const SESSION_GC_PERIOD: Duration = Duration::from_secs(3600);
+const SESSION_GC_TIMEOUT: Duration = Duration::from_secs(604_800);
 
 mod config;
 mod context;
@@ -76,11 +79,8 @@ async fn main() {
                     .expect("Redis connection failed"),
             );
 
-            let mut session_collector = SessionCollector::new(
-                session_backend.clone(),
-                config.session_gc_period,
-                config.session_gc_timeout,
-            );
+            let mut session_collector =
+                SessionCollector::new(session_backend.clone(), SESSION_GC_PERIOD, SESSION_GC_TIMEOUT);
             tokio::spawn(async move { session_collector.run().await });
 
             let context = Context {

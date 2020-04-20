@@ -5,7 +5,6 @@ use std::{
     error::Error,
     fmt,
     net::{AddrParseError, SocketAddr},
-    time::Duration,
 };
 
 #[derive(Debug, Deserialize)]
@@ -18,8 +17,6 @@ struct RawConfig {
     postgres_url: String,
     redis_url: String,
     chat_id: Integer,
-    session_gc_period: u64,
-    session_gc_timeout: u64,
 }
 
 fn default_webhook_path() -> String {
@@ -34,8 +31,6 @@ pub struct Config {
     pub redis_url: String,
     pub postgres_url: String,
     pub chat_id: Integer,
-    pub session_gc_period: Duration,
-    pub session_gc_timeout: Duration,
 }
 
 impl Config {
@@ -55,8 +50,6 @@ impl Config {
             redis_url: raw.redis_url,
             postgres_url: raw.postgres_url,
             chat_id: raw.chat_id,
-            session_gc_period: Duration::from_secs(raw.session_gc_period),
-            session_gc_timeout: Duration::from_secs(raw.session_gc_timeout),
         })
     }
 
