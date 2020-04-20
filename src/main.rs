@@ -1,8 +1,7 @@
 use carapax::{
-    access::{AccessHandler, AccessRule, InMemoryAccessPolicy},
     longpoll::LongPoll,
     session::{backend::redis::RedisBackend as RedisSessionBackend, SessionCollector, SessionManager},
-    webhook, Api, Dispatcher,
+    webhook, Api,
 };
 use darkredis::ConnectionPool as RedisPool;
 use dotenv::dotenv;
@@ -18,25 +17,13 @@ const SESSION_GC_TIMEOUT: Duration = Duration::from_secs(604_800);
 mod config;
 mod context;
 mod db;
+mod dispatcher;
 mod handler;
 mod scheduler;
 mod sender;
 mod syndication;
 
-use self::{
-    config::Config,
-    context::Context,
-    handler::{
-        autoresponse::AutoresponseHandler,
-        ferris::handle_ferris,
-        greetings::handle_new_chat_member,
-        text::{replace_text_handler, TransformCommand},
-        user::get_user_info,
-    },
-    scheduler::Scheduler,
-    sender::MessageSender,
-    syndication::Syndication,
-};
+use self::{config::Config, context::Context, scheduler::Scheduler, sender::MessageSender, syndication::Syndication};
 
 #[tokio::main]
 async fn main() {
@@ -44,8 +31,6 @@ async fn main() {
     env_logger::init();
 
     let config = Config::from_env().expect("Can not read config");
-    let api_config = config.get_api_config().expect("Can not get API config");
-    let api = Api::new(api_config).expect("Failed to create API");
 
     let (mut pg_client, pg_connection) = pg_connect(&config.postgres_url, PgNoTls)
         .await
@@ -70,6 +55,9 @@ async fn main() {
             }
         },
         None => {
+            let api_config = config.get_api_config().expect("Can not get API config");
+            let api = Api::new(api_config).expect("Failed to create API");
+
             let pg_client = Arc::new(pg_client);
 
             let session_backend = RedisSessionBackend::new(
@@ -101,26 +89,7 @@ async fn main() {
                 }
             });
 
-            let mut dispatcher = Dispatcher::new(context);
-            dispatcher.add_handler(AccessHandler::new(
-                InMemoryAccessPolicy::default().push_rule(AccessRule::allow_chat(config.chat_id)),
-            ));
-            dispatcher.add_handler(handle_new_chat_member);
-            dispatcher.add_handler(
-                AutoresponseHandler::new(pg_client)
-                    .await
-                    .expect("Failed to create autoresponse handler"),
-            );
-            dispatcher.add_handler(replace_text_handler);
-            dispatcher.add_handler(TransformCommand::arrow());
-            dispatcher.add_handler(TransformCommand::cw());
-            dispatcher.add_handler(TransformCommand::jerkify());
-            dispatcher.add_handler(TransformCommand::huify());
-            dispatcher.add_handler(TransformCommand::reverse());
-            dispatcher.add_handler(TransformCommand::square());
-            dispatcher.add_handler(TransformCommand::star());
-            dispatcher.add_handler(get_user_info);
-            dispatcher.add_handler(handle_ferris);
+            let dispatcher = dispatcher::create(context, config.chat_id).await;
 
             match config.webhook_url {
                 Some((addr, path)) => {
