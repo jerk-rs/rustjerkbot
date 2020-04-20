@@ -10,8 +10,6 @@
 - `RUSTJERKBOT_REDIS_URL` - Redis URL: localhost:6379 for example
 - `RUSTJERKBOT_POSTGRES_URL` - PostgreSQL URL: postgresql://user:pass@host/database
 - `RUSTJERKBOT_CHAT_ID` - Chat ID to work with.
-- `RUSTJERKBOT_SESSION_GC_PERIOD` - Interval between session GC calls.
-- `RUSTJERKBOT_SESSION_GC_TIMEOUT` - Session lifetime.
 - `RUSTJERKBOT_WEBHOOK_ADDRESS` - Server address for webhooks (`127.0.0.1` for example), optional.
 - `RUSTJERKBOT_WEBHOOK_PATH` - Path for webhooks, must start with `/`. It's recommended to use a random string. Default values is: `/`.
 
